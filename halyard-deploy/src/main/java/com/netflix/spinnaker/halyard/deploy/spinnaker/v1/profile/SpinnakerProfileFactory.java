@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpinnakerProfileFactory extends StringBackedProfileFactory {
   @Override
-  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
     profile.appendContents(yamlToString(endpoints));
   }
 

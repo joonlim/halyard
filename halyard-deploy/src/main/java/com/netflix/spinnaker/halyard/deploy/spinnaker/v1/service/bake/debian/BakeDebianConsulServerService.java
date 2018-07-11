@@ -76,10 +76,10 @@ public class BakeDebianConsulServerService extends ConsulServerService implement
     List<Profile> result = new ArrayList<>();
     String name = "startup-consul.sh";
     String path = Paths.get(startupScriptPath, name).toString();
-    result.add(consulServerStartupProfileFactory.getProfile(name, path, deploymentConfiguration, endpoints));
+    result.add(consulServerStartupProfileFactory.getProfile(name, path, deploymentConfiguration, endpoints, getRole()));
     name = "google/bootstrap-consul.sh";
     path = Paths.get(startupScriptPath, name).toString();
-    result.add(consulServerBootstrapGoogleProfileFactory.getProfile(name, path, deploymentConfiguration, endpoints));
+    result.add(consulServerBootstrapGoogleProfileFactory.getProfile(name, path, deploymentConfiguration, endpoints, getRole()));
     return result;
   }
 

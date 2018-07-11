@@ -39,6 +39,7 @@ import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerArtifact;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.RegistryBackedProfileFactory;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -66,7 +67,7 @@ public class DeckProfileFactory extends RegistryBackedProfileFactory {
   }
 
   @Override
-  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
     StringResource configTemplate = new StringResource(profile.getBaseContents());
     UiSecurity uiSecurity = deploymentConfiguration.getSecurity().getUiSecurity();
     profile.setUser(ApacheSettings.APACHE_USER);
@@ -77,7 +78,8 @@ public class DeckProfileFactory extends RegistryBackedProfileFactory {
     String version = deploymentConfiguration.getVersion();
 
     // Configure global settings
-    bindings.put("gate.baseUrl", endpoints.getServices().getGate().getBaseUrl());
+    bindings.put("gate.baseUrl", endpoints.getServiceSettings(
+        SpinnakerService.TypeAndRole.of(SpinnakerService.Type.DECK, role)).getBaseUrl());
     bindings.put("timezone", deploymentConfiguration.getTimezone());
     bindings.put("version", deploymentConfiguration.getVersion());
 

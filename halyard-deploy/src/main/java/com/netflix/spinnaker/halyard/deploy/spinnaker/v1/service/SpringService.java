@@ -43,7 +43,7 @@ abstract public class SpringService<T> extends SpinnakerService<T> {
     String filename = "spinnaker.yml";
     String path = Paths.get(getConfigOutputPath(), filename).toString();
     List<Profile> result = new ArrayList<>();
-    result.add(spinnakerProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints));
+    result.add(spinnakerProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints, getRole()));
     return result;
   }
 

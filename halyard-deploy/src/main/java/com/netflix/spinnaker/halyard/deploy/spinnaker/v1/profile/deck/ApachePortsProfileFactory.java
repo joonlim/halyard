@@ -22,6 +22,7 @@ import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerArtifact;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.TemplateBackedProfileFactory;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerService;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -47,16 +48,18 @@ public class ApachePortsProfileFactory extends TemplateBackedProfileFactory {
   }
 
   @Override
-  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
-    super.setProfile(profile, deploymentConfiguration, endpoints);
+  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
+    super.setProfile(profile, deploymentConfiguration, endpoints, role);
     profile.setUser(ApacheSettings.APACHE_USER);
   }
 
   @Override
-  protected Map<String, Object> getBindings(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+  protected Map<String, Object> getBindings(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
     Map<String, Object> bindings = new HashMap<>();
-    bindings.put("deck-host", endpoints.getServices().getDeck().getHost());
-    bindings.put("deck-port", endpoints.getServices().getDeck().getPort() + "");
+    bindings.put("deck-host", endpoints.getServiceSettings(SpinnakerService.TypeAndRole.ofDefaultRole(
+        SpinnakerService.Type.DECK)).getHost());
+    bindings.put("deck-port", endpoints.getServiceSettings(SpinnakerService.TypeAndRole.ofDefaultRole(
+        SpinnakerService.Type.DECK)).getPort() + "");
     return bindings;
   }
 

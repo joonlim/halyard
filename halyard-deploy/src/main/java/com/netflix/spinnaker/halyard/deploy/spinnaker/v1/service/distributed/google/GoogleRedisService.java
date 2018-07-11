@@ -66,7 +66,7 @@ public class GoogleRedisService extends RedisService implements GoogleDistribute
   @Override
   public List<Profile> getProfiles(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
     List<Profile> result = new ArrayList<>();
-    result.add(redisConfProfileFactory.getProfile("redis.conf", "/etc/redis/redis.conf", deploymentConfiguration, endpoints));
+    result.add(redisConfProfileFactory.getProfile("redis.conf", "/etc/redis/redis.conf", deploymentConfiguration, endpoints, getRole()));
     return result;
   }
 

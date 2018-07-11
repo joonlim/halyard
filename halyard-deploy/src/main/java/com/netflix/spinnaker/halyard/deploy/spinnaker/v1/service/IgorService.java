@@ -62,7 +62,7 @@ abstract public class IgorService extends SpringService<IgorService.Igor> {
     String filename = "igor.yml";
 
     String path = Paths.get(getConfigOutputPath(), filename).toString();
-    Profile profile = igorProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints);
+    Profile profile = igorProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints, getRole());
 
     profiles.add(profile);
     return profiles;

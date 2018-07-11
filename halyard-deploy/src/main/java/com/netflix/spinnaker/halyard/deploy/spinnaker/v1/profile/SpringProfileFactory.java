@@ -30,7 +30,7 @@ public class SpringProfileFactory extends RegistryBackedProfileFactory {
   }
 
   @Override
-  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
     SpectatorConfig spectatorConfig = new SpectatorConfig();
     spectatorConfig
         .getSpectator()

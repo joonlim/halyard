@@ -83,7 +83,7 @@ public class KubernetesV1DeckService extends DeckService implements KubernetesV1
     List<Profile> result = new ArrayList<>();
     String filename = "settings.js";
     String path = Paths.get(settingsPath, filename).toString();
-    result.add(deckDockerProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints));
+    result.add(deckDockerProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints, getRole()));
     return result;
   }
 

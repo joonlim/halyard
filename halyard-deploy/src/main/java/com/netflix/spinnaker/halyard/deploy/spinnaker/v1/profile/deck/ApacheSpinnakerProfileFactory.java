@@ -26,6 +26,7 @@ import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerArtifact;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.TemplateBackedProfileFactory;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerService;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -62,13 +63,13 @@ public class ApacheSpinnakerProfileFactory extends TemplateBackedProfileFactory 
   }
 
   @Override
-  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
-    super.setProfile(profile, deploymentConfiguration, endpoints);
+  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
+    super.setProfile(profile, deploymentConfiguration, endpoints, role);
     profile.setUser(ApacheSettings.APACHE_USER);
   }
 
   @Override
-  protected Map<String, Object> getBindings(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+  protected Map<String, Object> getBindings(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
     TemplatedResource resource = new StringResource(SSL_TEMPLATE);
     Map<String, Object> bindings = new HashMap<>();
     UiSecurity uiSecurity = deploymentConfiguration.getSecurity().getUiSecurity();
@@ -78,8 +79,10 @@ public class ApacheSpinnakerProfileFactory extends TemplateBackedProfileFactory 
     String ssl = resource.setBindings(bindings).toString();
     bindings.clear();
     bindings.put("ssl", ssl);
-    bindings.put("deck-host", endpoints.getServices().getDeck().getHost());
-    bindings.put("deck-port", endpoints.getServices().getDeck().getPort() + "");
+    bindings.put("deck-host", endpoints.getServiceSettings(
+        SpinnakerService.TypeAndRole.ofDefaultRole(SpinnakerService.Type.DECK)).getHost());
+    bindings.put("deck-port", endpoints.getServiceSettings(
+        SpinnakerService.TypeAndRole.ofDefaultRole(SpinnakerService.Type.DECK)).getPort() + "");
     return bindings;
   }
 

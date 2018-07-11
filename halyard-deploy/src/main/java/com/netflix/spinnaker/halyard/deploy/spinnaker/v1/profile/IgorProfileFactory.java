@@ -33,8 +33,8 @@ public class IgorProfileFactory extends SpringProfileFactory {
   }
 
   @Override
-  public void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
-    super.setProfile(profile, deploymentConfiguration, endpoints);
+  public void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
+    super.setProfile(profile, deploymentConfiguration, endpoints, role);
     Providers providers = deploymentConfiguration.getProviders();
     if (providers.getDockerRegistry().isEnabled()) {
       profile.appendContents("dockerRegistry.enabled: true");

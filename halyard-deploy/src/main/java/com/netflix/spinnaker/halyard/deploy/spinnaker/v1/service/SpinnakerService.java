@@ -67,7 +67,7 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
 
   @Override
   public String getServiceName() {
-    return getType().getServiceName();
+    return getTypeAndRole().getServiceName();
   }
 
   public String getCanonicalName() {
@@ -137,7 +137,7 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
         }
       };
 
-      return Optional.of(factory.getProfile(profileName, outputPath, deploymentConfiguration, runtimeSettings));
+      return Optional.of(factory.getProfile(profileName, outputPath, deploymentConfiguration, runtimeSettings, getRole()));
     });
   }
 
@@ -161,6 +161,15 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
 
     public static TypeAndRole ofDefaultRole(Type type) {
       return new TypeAndRole(type, DEFAULT_ROLE);
+    }
+
+    public String getServiceName() {
+      return role.equals(DEFAULT_ROLE) ? type.getServiceName() : type.getServiceName() + "-" + role;
+    }
+
+    @Override
+    public String toString() {
+      return role.equals(DEFAULT_ROLE) ? type.getCanonicalName() : type.getCanonicalName() + "-" + role;
     }
   }
 

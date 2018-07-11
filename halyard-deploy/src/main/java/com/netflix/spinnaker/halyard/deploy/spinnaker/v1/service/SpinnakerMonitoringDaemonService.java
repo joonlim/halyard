@@ -77,21 +77,21 @@ abstract public class SpinnakerMonitoringDaemonService extends SpinnakerService<
   @Override
   public List<Profile> getProfiles(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
     List<Profile> results = new ArrayList<>();
-    for (Map.Entry<Type, ServiceSettings> entry : endpoints.getAllServiceSettings().entrySet()) {
+    for (Map.Entry<TypeAndRole, ServiceSettings> entry : endpoints.getAllServiceSettings().entrySet()) {
       ServiceSettings settings = entry.getValue();
       if (settings.getMonitored() && settings.getEnabled()) {
-        String serviceName = entry.getKey().getCanonicalName();
+        String serviceName = entry.getKey().getServiceName();
         String profileName = serviceRegistryProfileName(serviceName);
         String profilePath = Paths.get(REGISTRY_OUTPUT_PATH, serviceName + ".yml").toString();
         ProfileFactory factory = metricRegistryProfileFactoryBuilder.build(settings);
-        results.add(factory.getProfile(profileName, profilePath, deploymentConfiguration, endpoints));
+        results.add(factory.getProfile(profileName, profilePath, deploymentConfiguration, endpoints, entry.getKey().getRole()));
       }
     }
 
     String profileName = monitoringProfileName();
     String profilePath = Paths.get(CONFIG_OUTPUT_PATH, profileName).toString();
 
-    results.add(spinnakerMonitoringDaemonProfileFactory.getProfile(profileName, profilePath, deploymentConfiguration, endpoints));
+    results.add(spinnakerMonitoringDaemonProfileFactory.getProfile(profileName, profilePath, deploymentConfiguration, endpoints, getRole()));
     return results;
   }
 

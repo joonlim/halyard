@@ -97,8 +97,8 @@ public class RoscoProfileFactory extends SpringProfileFactory {
   }
 
   @Override
-  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
-    super.setProfile(profile, deploymentConfiguration, endpoints);
+  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
+    super.setProfile(profile, deploymentConfiguration, endpoints, role);
 
     Providers providers = deploymentConfiguration.getProviders();
     Providers otherProviders = getImageProviders(profile.getVersion(), deploymentConfiguration.getName());

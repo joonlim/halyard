@@ -83,19 +83,19 @@ abstract public class DeckService extends SpinnakerService<DeckService.Deck> {
     String sitePath = "/etc/apache2/sites-available/";
     String filename = "settings.js";
     String path = Paths.get(htmlPath, filename).toString();
-    result.add(deckProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints));
+    result.add(deckProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints, getRole()));
 
     filename = "passphrase";
     path = Paths.get(apache2Path, filename).toString();
-    result.add(apachePassphraseProfileFactory.getProfile("apache2/" + filename, path, deploymentConfiguration, endpoints).setExecutable(true));
+    result.add(apachePassphraseProfileFactory.getProfile("apache2/" + filename, path, deploymentConfiguration, endpoints, getRole()).setExecutable(true));
 
     filename = "ports.conf";
     path = Paths.get(apache2Path, filename).toString();
-    result.add(apachePortsProfileFactory.getProfile("apache2/" + filename, path, deploymentConfiguration, endpoints));
+    result.add(apachePortsProfileFactory.getProfile("apache2/" + filename, path, deploymentConfiguration, endpoints, getRole()));
 
     filename = "spinnaker.conf";
     path = Paths.get(sitePath, filename).toString();
-    result.add(apacheSpinnakerProfileFactory.getProfile("apache2/" + filename, path, deploymentConfiguration, endpoints));
+    result.add(apacheSpinnakerProfileFactory.getProfile("apache2/" + filename, path, deploymentConfiguration, endpoints, getRole()));
 
     return result;
   }

@@ -33,7 +33,7 @@ abstract public class CustomProfileFactory extends ProfileFactory {
   abstract protected Path getUserProfilePath();
 
   @Override
-  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
     profile.appendContents(profile.getBaseContents());
     // No modifications are made to user-supplied profiles.
   }

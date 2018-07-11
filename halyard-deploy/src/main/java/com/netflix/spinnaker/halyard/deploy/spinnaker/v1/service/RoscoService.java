@@ -86,7 +86,7 @@ abstract public class RoscoService extends SpringService<RoscoService.Rosco> {
     String filename = "rosco.yml";
 
     String path = Paths.get(getConfigOutputPath(), filename).toString();
-    Profile profile = roscoProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints);
+    Profile profile = roscoProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints, getRole());
 
     appendCustomConfigDir(profile);
 

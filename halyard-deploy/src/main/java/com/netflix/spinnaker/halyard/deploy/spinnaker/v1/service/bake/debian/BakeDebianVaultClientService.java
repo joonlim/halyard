@@ -79,13 +79,13 @@ public class BakeDebianVaultClientService extends VaultClientService implements 
     List<Profile> result = new ArrayList<>();
     String name = "mount-config.py";
     String path = Paths.get(startupScriptPath, name).toString();
-    result.add(mountConfigProfileFactory.getProfile(name, path, deploymentConfiguration, endpoints));
+    result.add(mountConfigProfileFactory.getProfile(name, path, deploymentConfiguration, endpoints, getRole()));
     name = "startup-vault.sh";
     path = Paths.get(startupScriptPath, name).toString();
-    result.add(vaultStartupProfileFactory.getProfile(name, path, deploymentConfiguration, endpoints));
+    result.add(vaultStartupProfileFactory.getProfile(name, path, deploymentConfiguration, endpoints, getRole()));
     name = "google/mount-config.sh";
     path = Paths.get(startupScriptPath, name).toString();
-    result.add(mountGoogleConfigProfileFactory.getProfile(name, path, deploymentConfiguration, endpoints));
+    result.add(mountGoogleConfigProfileFactory.getProfile(name, path, deploymentConfiguration, endpoints, getRole()));
     return result;
   }
 

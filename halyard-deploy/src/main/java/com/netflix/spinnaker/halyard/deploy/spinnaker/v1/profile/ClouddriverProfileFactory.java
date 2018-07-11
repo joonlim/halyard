@@ -53,8 +53,8 @@ public class ClouddriverProfileFactory extends SpringProfileFactory {
   }
 
   @Override
-  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
-    super.setProfile(profile, deploymentConfiguration, endpoints);
+  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
+    super.setProfile(profile, deploymentConfiguration, endpoints, role);
 
     // We need to make modifications to this deployment configuration, but can't use helpful objects
     // like the accountService on a clone. Therefore, we'll make the modifications in place and

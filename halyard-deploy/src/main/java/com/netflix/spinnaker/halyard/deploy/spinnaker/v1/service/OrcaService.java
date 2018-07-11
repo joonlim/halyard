@@ -63,7 +63,7 @@ abstract public class OrcaService extends SpringService<OrcaService.Orca> {
     String filename = "orca.yml";
 
     String path = Paths.get(getConfigOutputPath(), filename).toString();
-    Profile profile = orcaProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints);
+    Profile profile = orcaProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints, getRole());
 
     profiles.add(profile);
     return profiles;

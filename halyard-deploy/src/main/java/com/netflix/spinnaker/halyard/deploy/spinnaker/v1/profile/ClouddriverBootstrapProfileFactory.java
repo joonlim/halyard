@@ -64,8 +64,8 @@ public class ClouddriverBootstrapProfileFactory extends SpringProfileFactory {
 
   @Override
   @SuppressWarnings("unchecked")
-  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
-    super.setProfile(profile, deploymentConfiguration, endpoints);
+  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
+    super.setProfile(profile, deploymentConfiguration, endpoints, role);
 
     DeploymentEnvironment deploymentEnvironment = deploymentConfiguration.getDeploymentEnvironment();
     if (deploymentEnvironment.getType() != DeploymentEnvironment.DeploymentType.Distributed) {

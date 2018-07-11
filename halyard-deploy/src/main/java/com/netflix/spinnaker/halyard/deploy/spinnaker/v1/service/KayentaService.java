@@ -72,7 +72,7 @@ abstract public class KayentaService extends SpringService<KayentaService.Kayent
     String filename = "kayenta.yml";
 
     String path = Paths.get(getConfigOutputPath(), filename).toString();
-    Profile profile = kayentaProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints);
+    Profile profile = kayentaProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints, getRole());
 
     profiles.add(profile);
     return profiles;
@@ -106,7 +106,7 @@ abstract public class KayentaService extends SpringService<KayentaService.Kayent
               .setAccessKeyId(awsCanaryAccount.getAccessKeyId())
               .setSecretAccessKey(awsCanaryAccount.getSecretAccessKey())
               .build()
-              .getProfile(name, outputFile, deploymentConfiguration, endpoints));
+              .getProfile(name, outputFile, deploymentConfiguration, endpoints, getRole()));
         }
       }
     }

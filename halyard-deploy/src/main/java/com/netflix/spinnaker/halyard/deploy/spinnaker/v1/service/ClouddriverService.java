@@ -79,7 +79,7 @@ abstract public class ClouddriverService extends SpringService<ClouddriverServic
     String filename = "clouddriver.yml";
 
     String path = Paths.get(getConfigOutputPath(), filename).toString();
-    Profile profile = getClouddriverProfileFactory().getProfile(filename, path, deploymentConfiguration, endpoints);
+    Profile profile = getClouddriverProfileFactory().getProfile(filename, path, deploymentConfiguration, endpoints, getRole());
 
     profiles.add(profile);
     return profiles;
@@ -97,7 +97,7 @@ abstract public class ClouddriverService extends SpringService<ClouddriverServic
           .setAccessKeyId(awsProvider.getAccessKeyId())
           .setSecretAccessKey(awsProvider.getSecretAccessKey())
           .build()
-          .getProfile(name, outputFile, deploymentConfiguration, endpoints));
+          .getProfile(name, outputFile, deploymentConfiguration, endpoints, getRole())); // TODO: what should role be
     } else {
       return Optional.empty();
     }

@@ -45,7 +45,7 @@ public class ConsulServiceProfileFactoryBuilder {
   @Autowired
   protected ObjectMapper objectMapper;
 
-  public ProfileFactory build(SpinnakerService.Type type, ServiceSettings settings) {
+  public ProfileFactory build(SpinnakerService.TypeAndRole typeAndRole, ServiceSettings settings) {
     return new ProfileFactory() {
       @Override
       protected ArtifactService getArtifactService() {
@@ -53,7 +53,7 @@ public class ConsulServiceProfileFactoryBuilder {
       }
 
       @Override
-      protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+      protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
         ConsulCheck check = new ConsulCheck()
             .setId("default-hal-check")
             .setInterval("30s");
@@ -71,7 +71,7 @@ public class ConsulServiceProfileFactoryBuilder {
         }
 
         ConsulService consulService = new ConsulService()
-            .setName(type.getCanonicalName())
+            .setName(typeAndRole.getServiceName())
             .setPort(settings.getPort())
             .setChecks(Collections.singletonList(check));
 

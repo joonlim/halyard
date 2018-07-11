@@ -24,6 +24,7 @@ import com.netflix.spinnaker.halyard.core.error.v1.HalException;
 import com.netflix.spinnaker.halyard.core.problem.v1.Problem;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerArtifact;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +48,7 @@ public class Front50ProfileFactory extends SpringProfileFactory {
   }
 
   @Override
-  public void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+  public void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
     PersistentStorage persistentStorage = deploymentConfiguration.getPersistentStorage();
 
     if (persistentStorage.getPersistentStoreType() == null) {
@@ -66,7 +67,9 @@ public class Front50ProfileFactory extends SpringProfileFactory {
         URI connectionUri = null;
         if (persistentStore instanceof RedisPersistentStore) {
           try {
-            connectionUri = new URI(endpoints.getServices().getRedis().getBaseUrl());
+            // TODO: change to front50 redis
+            connectionUri = new URI(endpoints.getServiceSettings(SpinnakerService.TypeAndRole.ofDefaultRole(
+                SpinnakerService.Type.REDIS)).getBaseUrl());
           } catch (URISyntaxException e) {
             throw new RuntimeException("Malformed redis URL, this is a bug.");
           }
@@ -87,7 +90,7 @@ public class Front50ProfileFactory extends SpringProfileFactory {
     Map<String, Object> spinnakerObjectMap = new HashMap<>();
     spinnakerObjectMap.put("spinnaker", persistentStorageMap);
 
-    super.setProfile(profile, deploymentConfiguration, endpoints);
+    super.setProfile(profile, deploymentConfiguration, endpoints, role);
     profile.appendContents(yamlToString(spinnakerObjectMap))
         .appendContents(profile.getBaseContents())
         .setRequiredFiles(files);

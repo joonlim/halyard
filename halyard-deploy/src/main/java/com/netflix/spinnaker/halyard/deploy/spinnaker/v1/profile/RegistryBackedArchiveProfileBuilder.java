@@ -84,7 +84,7 @@ public class RegistryBackedArchiveProfileBuilder {
 
         result.add((new ProfileFactory() {
           @Override
-          protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+          protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
             profile.setContents(profile.getBaseContents());
             profile.setExecutable(executable);
           }
@@ -113,7 +113,7 @@ public class RegistryBackedArchiveProfileBuilder {
           protected String commentPrefix() {
             return null;
           }
-        }).getProfile(profileName, outputPath, deploymentConfiguration, null));
+        }).getProfile(profileName, outputPath, deploymentConfiguration, null, ""));// TODO: what should role be?
 
         profileEntry = tis.getNextTarEntry();
       }

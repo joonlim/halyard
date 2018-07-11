@@ -66,7 +66,7 @@ public class KubernetesV2DeckService extends DeckService implements KubernetesV2
   public List<Profile> getProfiles(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
     List<Profile> result = new ArrayList<>();
     String path = Paths.get(settingsPath, settingsJs).toString();
-    result.add(deckDockerProfileFactory.getProfile(settingsJs, path, deploymentConfiguration, endpoints));
+    result.add(deckDockerProfileFactory.getProfile(settingsJs, path, deploymentConfiguration, endpoints, getRole()));
     return result;
   }
 

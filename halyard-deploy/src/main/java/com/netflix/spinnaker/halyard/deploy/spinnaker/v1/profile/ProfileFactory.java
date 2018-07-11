@@ -51,11 +51,11 @@ abstract public class ProfileFactory {
     return artifactService;
   }
 
-  public Profile getProfile(String name, String outputFile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+  public Profile getProfile(String name, String outputFile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
     String deploymentName = deploymentConfiguration.getName();
     String version = getArtifactService().getArtifactVersion(deploymentName, getArtifact());
-    Profile result = getBaseProfile(name, version, outputFile);
-    setProfile(result, deploymentConfiguration, endpoints);
+    Profile result = getBaseProfile(name, version, outputFile); // TODO: name + role?
+    setProfile(result, deploymentConfiguration, endpoints, role);
     if (showEditWarning()) {
       result.preppendContents(getEditWarning());
     }
@@ -63,7 +63,7 @@ abstract public class ProfileFactory {
     return result;
   }
 
-  abstract protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints);
+  abstract protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role);
 
   abstract protected Profile getBaseProfile(String name, String version, String outputFile);
 

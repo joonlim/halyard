@@ -56,7 +56,7 @@ abstract public class ClouddriverBootstrapService extends ClouddriverService {
 
     String filename = "clouddriver-bootstrap.yml";
     String path = Paths.get(getConfigOutputPath(), filename).toString();
-    Profile profile = clouddriverBootstrapProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints);
+    Profile profile = clouddriverBootstrapProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints, getRole());
 
     profiles.add(profile);
     return profiles;

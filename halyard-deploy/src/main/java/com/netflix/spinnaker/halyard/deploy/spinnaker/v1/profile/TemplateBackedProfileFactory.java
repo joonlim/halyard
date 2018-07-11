@@ -27,7 +27,7 @@ import java.util.Map;
 
 abstract public class TemplateBackedProfileFactory extends ProfileFactory {
   abstract protected String getTemplate();
-  abstract protected Map<String, Object> getBindings(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints);
+  abstract protected Map<String, Object> getBindings(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role);
 
   protected List<String> requiredFiles(DeploymentConfiguration deploymentConfiguration) {
     return new ArrayList<>();
@@ -39,10 +39,10 @@ abstract public class TemplateBackedProfileFactory extends ProfileFactory {
   }
 
   @Override
-  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
     StringResource template = new StringResource(profile.getBaseContents());
     profile.setRequiredFiles(requiredFiles(deploymentConfiguration));
-    Map<String, Object> bindings = getBindings(deploymentConfiguration, endpoints);
+    Map<String, Object> bindings = getBindings(deploymentConfiguration, endpoints, role);
     profile.setContents(template.setBindings(bindings).toString());
   }
 }

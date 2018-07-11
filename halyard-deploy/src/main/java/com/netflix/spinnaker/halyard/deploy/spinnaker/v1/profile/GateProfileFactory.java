@@ -22,6 +22,7 @@ import com.netflix.spinnaker.halyard.config.model.v1.security.Security;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerArtifact;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ServiceSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang.StringUtils;
@@ -38,13 +39,14 @@ public abstract class GateProfileFactory extends SpringProfileFactory {
   @Override
   public void setProfile(Profile profile,
       DeploymentConfiguration deploymentConfiguration,
-      SpinnakerRuntimeSettings endpoints) {
-    super.setProfile(profile, deploymentConfiguration, endpoints);
+      SpinnakerRuntimeSettings endpoints,
+      String role) {
+    super.setProfile(profile, deploymentConfiguration, endpoints, role);
     Security security = deploymentConfiguration.getSecurity();
     List<String> requiredFiles = backupRequiredFiles(security.getApiSecurity(), deploymentConfiguration.getName());
     requiredFiles.addAll(backupRequiredFiles(security.getAuthn(), deploymentConfiguration.getName()));
     requiredFiles.addAll(backupRequiredFiles(security.getAuthz(), deploymentConfiguration.getName()));
-    GateConfig gateConfig = getGateConfig(endpoints.getServices().getGate(), security);
+    GateConfig gateConfig = getGateConfig(endpoints.getServiceSettings(SpinnakerService.TypeAndRole.of(SpinnakerService.Type.GATE, role)), security);
     gateConfig.getCors().setAllowedOriginsPattern(security.getApiSecurity());
     profile.appendContents(yamlToString(gateConfig))
         .appendContents(profile.getBaseContents())

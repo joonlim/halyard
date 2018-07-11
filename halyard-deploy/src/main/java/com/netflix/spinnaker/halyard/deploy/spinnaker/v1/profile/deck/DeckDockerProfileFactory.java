@@ -24,6 +24,7 @@ import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerArtifact;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ServiceSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,11 +46,13 @@ public class DeckDockerProfileFactory extends DeckProfileFactory {
   }
 
   @Override
-  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
-    super.setProfile(profile, deploymentConfiguration, endpoints);
+  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
+    super.setProfile(profile, deploymentConfiguration, endpoints, role);
 
-    ServiceSettings deckSettings = endpoints.getServices().getDeck();
-    ServiceSettings gateSettings = endpoints.getServices().getGate();
+    ServiceSettings deckSettings = endpoints.getServiceSettings(SpinnakerService.TypeAndRole.of(
+        SpinnakerService.Type.DECK, role));
+    ServiceSettings gateSettings = endpoints.getServiceSettings(SpinnakerService.TypeAndRole.of(
+        SpinnakerService.Type.GATE, role));
     ApacheSsl apacheSsl= deploymentConfiguration.getSecurity().getUiSecurity().getSsl();
     Map<String, String> env = profile.getEnv();
 

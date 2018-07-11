@@ -70,7 +70,7 @@ abstract public class Front50Service extends SpringService<Front50Service.Front5
     String filename = "front50.yml";
 
     String path = Paths.get(getConfigOutputPath(), filename).toString();
-    Profile profile = front50ProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints);
+    Profile profile = front50ProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints, getRole());
 
     profiles.add(profile);
     return profiles;
@@ -89,7 +89,7 @@ abstract public class Front50Service extends SpringService<Front50Service.Front5
           .setAccessKeyId(store.getAccessKeyId())
           .setSecretAccessKey(store.getSecretAccessKey())
           .build()
-          .getProfile(name, outputFile, deploymentConfiguration, endpoints));
+          .getProfile(name, outputFile, deploymentConfiguration, endpoints, getRole()));
     } else {
       return Optional.empty();
     }

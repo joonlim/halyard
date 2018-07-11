@@ -33,8 +33,8 @@ public class FiatProfileFactory extends SpringProfileFactory {
   }
 
   @Override
-  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
-    super.setProfile(profile, deploymentConfiguration, endpoints);
+  protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
+    super.setProfile(profile, deploymentConfiguration, endpoints, role);
     Authz authz = deploymentConfiguration.getSecurity().getAuthz();
     List<String> files = backupRequiredFiles(authz, deploymentConfiguration.getName());
     AuthConfig authConfig = new AuthConfig().setAuth(authz);
