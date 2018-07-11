@@ -37,10 +37,10 @@ public class LocalGitDeployer extends LocalDeployer {
   @Override
   public RemoteAction prep(LocalServiceProvider serviceProvider,
       DeploymentDetails deploymentDetails, SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes) {
+      List<SpinnakerService.TypeAndRole> serviceTypesAndRoles) {
     LocalGitServiceProvider localGitServiceProvider = (LocalGitServiceProvider) serviceProvider;
     List<LocalGitService> enabledServices = localGitServiceProvider
-        .getLocalGitServices(serviceTypes);
+        .getLocalGitServices(serviceTypesAndRoles);
 
     List<String> prepCommands = enabledServices.stream()
         .filter(i -> {

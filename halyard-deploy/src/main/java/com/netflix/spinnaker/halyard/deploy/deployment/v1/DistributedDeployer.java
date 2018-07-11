@@ -69,60 +69,61 @@ public class DistributedDeployer<T extends Account> implements
       AccountDeploymentDetails<T> deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
       List<SpinnakerService.Type> serviceTypes) {
-    DaemonTaskHandler.newStage("Checking if it is safe to roll back all services");
-    for (DistributedService distributedService : serviceProvider
-        .getPrioritizedDistributedServices(serviceTypes)) {
-      SpinnakerService service = distributedService.getService();
-      ServiceSettings settings = runtimeSettings.getServiceSettings(service);
-      boolean safeToUpdate = settings.getSafeToUpdate();
-
-      if (!settings.getEnabled() || distributedService.isRequiredToBootstrap() || !safeToUpdate
-          || settings.getSkipLifeCycleManagement()) {
-        continue;
-      }
-
-      RunningServiceDetails runningServiceDetails = distributedService
-          .getRunningServiceDetails(deploymentDetails, runtimeSettings);
-      if (runningServiceDetails.getInstances().keySet().size() == 1) {
-        throw new HalException(Problem.Severity.FATAL, "Service " + service.getCanonicalName()
-            + " has only one server group - there is nothing to rollback to.");
-      }
-    }
-
-    DaemonTaskHandler.newStage("Rolling back all updatable services");
-    for (DistributedService distributedService : serviceProvider
-        .getPrioritizedDistributedServices(serviceTypes)) {
-      SpinnakerService service = distributedService.getService();
-      ServiceSettings settings = runtimeSettings.getServiceSettings(service);
-      if (!settings.getEnabled() || settings.getSkipLifeCycleManagement()) {
-        continue;
-      }
-
-      boolean safeToUpdate = settings.getSafeToUpdate();
-      if (distributedService.isRequiredToBootstrap() || !safeToUpdate) {
-        // Do nothing, the bootstrapping services should already be running, and the services that can't be updated
-        // having nothing to rollback to
-      } else {
-        DaemonResponse.StaticRequestBuilder<Void> builder = new DaemonResponse.StaticRequestBuilder<>(
-            () -> {
-              Orca orca = serviceProvider
-                  .getDeployableService(SpinnakerService.Type.ORCA_BOOTSTRAP, Orca.class)
-                  .connectToPrimaryService(deploymentDetails, runtimeSettings);
-              DaemonTaskHandler.message("Rolling back " + distributedService.getServiceName()
-                  + " via Spinnaker red/black");
-              rollbackService(deploymentDetails, orca, distributedService, runtimeSettings);
-
-              return null;
-            });
-
-        DaemonTaskHandler
-            .submitTask(builder::build, "Rollback " + distributedService.getServiceName());
-      }
-    }
-
-    DaemonTaskHandler.message("Waiting on rollbacks to complete");
-    DaemonTaskHandler.reduceChildren(null, (t1, t2) -> null, (t1, t2) -> null)
-        .getProblemSet().throwifSeverityExceeds(Problem.Severity.WARNING);
+    // TODO
+    // DaemonTaskHandler.newStage("Checking if it is safe to roll back all services");
+    // for (DistributedService distributedService : serviceProvider
+    //     .getPrioritizedDistributedServices(serviceTypes)) {
+    //   SpinnakerService service = distributedService.getService();
+    //   ServiceSettings settings = runtimeSettings.getServiceSettings(service);
+    //   boolean safeToUpdate = settings.getSafeToUpdate();
+    //
+    //   if (!settings.getEnabled() || distributedService.isRequiredToBootstrap() || !safeToUpdate
+    //       || settings.getSkipLifeCycleManagement()) {
+    //     continue;
+    //   }
+    //
+    //   RunningServiceDetails runningServiceDetails = distributedService
+    //       .getRunningServiceDetails(deploymentDetails, runtimeSettings);
+    //   if (runningServiceDetails.getInstances().keySet().size() == 1) {
+    //     throw new HalException(Problem.Severity.FATAL, "Service " + service.getCanonicalName()
+    //         + " has only one server group - there is nothing to rollback to.");
+    //   }
+    // }
+    //
+    // DaemonTaskHandler.newStage("Rolling back all updatable services");
+    // for (DistributedService distributedService : serviceProvider
+    //     .getPrioritizedDistributedServices(serviceTypes)) {
+    //   SpinnakerService service = distributedService.getService();
+    //   ServiceSettings settings = runtimeSettings.getServiceSettings(service);
+    //   if (!settings.getEnabled() || settings.getSkipLifeCycleManagement()) {
+    //     continue;
+    //   }
+    //
+    //   boolean safeToUpdate = settings.getSafeToUpdate();
+    //   if (distributedService.isRequiredToBootstrap() || !safeToUpdate) {
+    //     // Do nothing, the bootstrapping services should already be running, and the services that can't be updated
+    //     // having nothing to rollback to
+    //   } else {
+    //     DaemonResponse.StaticRequestBuilder<Void> builder = new DaemonResponse.StaticRequestBuilder<>(
+    //         () -> {
+    //           Orca orca = serviceProvider
+    //               .getDeployableService(SpinnakerService.Type.ORCA_BOOTSTRAP, Orca.class)
+    //               .connectToPrimaryService(deploymentDetails, runtimeSettings);
+    //           DaemonTaskHandler.message("Rolling back " + distributedService.getServiceName()
+    //               + " via Spinnaker red/black");
+    //           rollbackService(deploymentDetails, orca, distributedService, runtimeSettings);
+    //
+    //           return null;
+    //         });
+    //
+    //     DaemonTaskHandler
+    //         .submitTask(builder::build, "Rollback " + distributedService.getServiceName());
+    //   }
+    // }
+    //
+    // DaemonTaskHandler.message("Waiting on rollbacks to complete");
+    // DaemonTaskHandler.reduceChildren(null, (t1, t2) -> null, (t1, t2) -> null)
+    //     .getProblemSet().throwifSeverityExceeds(Problem.Severity.WARNING);
 
   }
 
@@ -130,23 +131,24 @@ public class DistributedDeployer<T extends Account> implements
   public void collectLogs(DistributedServiceProvider<T> serviceProvider,
       AccountDeploymentDetails<T> deploymentDetails, SpinnakerRuntimeSettings runtimeSettings,
       List<SpinnakerService.Type> serviceTypes) {
-    for (DistributedService distributedService : serviceProvider
-        .getPrioritizedDistributedServices(serviceTypes)) {
-      if (distributedService instanceof LogCollector) {
-        ((LogCollector) distributedService).collectLogs(deploymentDetails, runtimeSettings);
-      } else {
-        log.warn(distributedService.getServiceName() + " cannot have logs collected");
-      }
-    }
+    // TODO
+    // for (DistributedService distributedService : serviceProvider
+    //     .getPrioritizedDistributedServices(serviceTypes)) {
+    //   if (distributedService instanceof LogCollector) {
+    //     ((LogCollector) distributedService).collectLogs(deploymentDetails, runtimeSettings);
+    //   } else {
+    //     log.warn(distributedService.getServiceName() + " cannot have logs collected");
+    //   }
+    // }
   }
 
   @Override
   public RemoteAction connectCommand(DistributedServiceProvider<T> serviceProvider,
       AccountDeploymentDetails<T> deploymentDetails, SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes) {
+      List<SpinnakerService.TypeAndRole> serviceTypesAndRoles) {
     RemoteAction result = new RemoteAction();
 
-    String connectCommands = String.join(" &\n", serviceTypes.stream()
+    String connectCommands = String.join(" &\n", serviceTypesAndRoles.stream()
         .map(t -> serviceProvider.getDeployableService(t)
             .connectCommand(deploymentDetails, runtimeSettings))
         .collect(Collectors.toList()));
@@ -160,28 +162,29 @@ public class DistributedDeployer<T extends Account> implements
   @Override
   public void flushInfrastructureCaches(DistributedServiceProvider<T> serviceProvider,
       AccountDeploymentDetails<T> deploymentDetails, SpinnakerRuntimeSettings runtimeSettings) {
-    try {
-      Jedis jedis = (Jedis) serviceProvider
-          .getDeployableService(SpinnakerService.Type.REDIS)
-          .connectToPrimaryService(deploymentDetails, runtimeSettings);
-      RedisService.flushKeySpace(jedis, "com.netflix.spinnaker.clouddriver*");
-    } catch (Exception e) {
-      throw new HalException(Problem.Severity.FATAL,
-          "Failed to flush redis cache: " + e.getMessage());
-    }
+    // TODO
+    // try {
+    //   Jedis jedis = (Jedis) serviceProvider
+    //       .getDeployableService(SpinnakerService.Type.REDIS)
+    //       .connectToPrimaryService(deploymentDetails, runtimeSettings);
+    //   RedisService.flushKeySpace(jedis, "com.netflix.spinnaker.clouddriver*");
+    // } catch (Exception e) {
+    //   throw new HalException(Problem.Severity.FATAL,
+    //       "Failed to flush redis cache: " + e.getMessage());
+    // }
   }
 
   @Override
   public RemoteAction deploy(DistributedServiceProvider<T> serviceProvider,
       AccountDeploymentDetails<T> deploymentDetails,
       ResolvedConfiguration resolvedConfiguration,
-      List<SpinnakerService.Type> serviceTypes) {
+      List<SpinnakerService.TypeAndRole> serviceTypesAndRoles) {
     SpinnakerRuntimeSettings runtimeSettings = resolvedConfiguration.getRuntimeSettings();
 
     DaemonTaskHandler.newStage("Deploying Spinnaker");
     // First deploy all services not owned by Spinnaker
     for (DistributedService distributedService : serviceProvider
-        .getPrioritizedDistributedServices(serviceTypes)) {
+        .getPrioritizedDistributedServices(serviceTypesAndRoles)) {
       SpinnakerService service = distributedService.getService();
       ServiceSettings settings = resolvedConfiguration.getServiceSettings(service);
       if (settings == null || !settings.getEnabled() || settings.getSkipLifeCycleManagement()) {
@@ -209,7 +212,7 @@ public class DistributedDeployer<T extends Account> implements
                     "Deploying " + distributedService.getServiceName() + " via red/black");
                 try {
                   Orca orca = serviceProvider
-                      .getDeployableService(SpinnakerService.Type.ORCA_BOOTSTRAP, Orca.class)
+                      .getDeployableService(SpinnakerService.TypeAndRole.ofDefaultRole(SpinnakerService.Type.ORCA_BOOTSTRAP), Orca.class)
                       .connectToPrimaryService(deploymentDetails, runtimeSettings);
                   deployServiceWithOrca(deploymentDetails, resolvedConfiguration, orca,
                       distributedService);
@@ -232,10 +235,10 @@ public class DistributedDeployer<T extends Account> implements
         .getProblemSet().throwifSeverityExceeds(Problem.Severity.WARNING);
 
     DistributedService<Orca, T> orca = serviceProvider
-        .getDeployableService(SpinnakerService.Type.ORCA);
+        .getDeployableService(SpinnakerService.TypeAndRole.ofDefaultRole(SpinnakerService.Type.ORCA));
     Set<Integer> unknownVersions = reapOrcaServerGroups(deploymentDetails, runtimeSettings, orca);
     reapRoscoServerGroups(deploymentDetails, runtimeSettings,
-        serviceProvider.getDeployableService(SpinnakerService.Type.ROSCO));
+        serviceProvider.getDeployableService(SpinnakerService.TypeAndRole.ofDefaultRole(SpinnakerService.Type.ROSCO)));
 
     if (!unknownVersions.isEmpty()) {
       String versions = String.join(", ",

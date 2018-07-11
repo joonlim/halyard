@@ -119,7 +119,7 @@ public interface LocalGitService<T> extends LocalService<T> {
   }
 
   default String stageProfilesCommand(DeploymentDetails details, GenerateService.ResolvedConfiguration resolvedConfiguration) {
-    Map<String, Profile> profiles = resolvedConfiguration.getProfilesForService(getService().getType());
+    Map<String, Profile> profiles = resolvedConfiguration.getProfilesForService(getService().getTypeAndRole());
 
     List<String> allCommands = new ArrayList<>();
     for (Map.Entry<String, Profile> entry : profiles.entrySet()) {

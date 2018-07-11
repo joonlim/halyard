@@ -110,10 +110,10 @@ public class LocalGitServiceProvider extends LocalServiceProvider {
     throw new UnsupportedOperationException();
   }
 
-  public List<LocalGitService> getLocalGitServices(List<SpinnakerService.Type> serviceTypes) {
+  public List<LocalGitService> getLocalGitServices(List<SpinnakerService.TypeAndRole> serviceTypesAndRoles) {
     return getFieldsOfType(LocalGitService.class)
         .stream()
-        .filter(s -> s != null && serviceTypes.contains(s.getService().getType()))
+        .filter(s -> s != null && serviceTypesAndRoles.contains(s.getService().getTypeAndRole()))
         .collect(Collectors.toList());
   }
 }

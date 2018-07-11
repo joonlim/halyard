@@ -43,6 +43,7 @@ import com.netflix.spinnaker.halyard.deploy.deployment.v1.ServiceProviderFactory
 import com.netflix.spinnaker.halyard.deploy.services.v1.GenerateService.ResolvedConfiguration;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerService;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerService.Type;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerServiceProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -140,23 +141,19 @@ public class DeployService {
     }
   }
 
-  public RemoteAction connectCommand(String deploymentName, List<String> serviceNames) {
+  public RemoteAction connectCommand(String deploymentName, List<SpinnakerService.TypeAndRole> serviceTypesAndRoles) {
     DeploymentConfiguration deploymentConfiguration = deploymentService.getDeploymentConfiguration(deploymentName);
     SpinnakerServiceProvider<DeploymentDetails> serviceProvider = serviceProviderFactory.create(deploymentConfiguration);
     SpinnakerRuntimeSettings runtimeSettings = serviceProvider.buildRuntimeSettings(deploymentConfiguration);
     Deployer deployer = getDeployer(deploymentConfiguration);
     DeploymentDetails deploymentDetails = getDeploymentDetails(deploymentConfiguration);
 
-    List<SpinnakerService.Type> serviceTypes = serviceNames.stream()
-        .map(SpinnakerService.Type::fromCanonicalName)
-        .collect(Collectors.toList());
-
-    if (serviceTypes.isEmpty()) {
-      serviceTypes.add(SpinnakerService.Type.DECK);
-      serviceTypes.add(SpinnakerService.Type.GATE);
+    if (serviceTypesAndRoles.isEmpty()) {
+      serviceTypesAndRoles.add(SpinnakerService.TypeAndRole.ofDefaultRole(Type.DECK));
+      serviceTypesAndRoles.add(SpinnakerService.TypeAndRole.ofDefaultRole(Type.GATE));
     }
 
-    RemoteAction result = deployer.connectCommand(serviceProvider, deploymentDetails, runtimeSettings, serviceTypes);
+    RemoteAction result = deployer.connectCommand(serviceProvider, deploymentDetails, runtimeSettings, serviceTypesAndRoles);
     result.setAutoRun(true);
     result.commitScript(halconfigDirectoryStructure.getConnectScriptPath(deploymentName));
     return result;
@@ -202,33 +199,29 @@ public class DeployService {
     deployer.rollback(serviceProvider, deploymentDetails, runtimeSettings, serviceTypes);
   }
 
-  public RemoteAction prep(String deploymentName, List<String> serviceNames, List<String> excludeServiceNames) {
+  public RemoteAction prep(String deploymentName, List<SpinnakerService.TypeAndRole> serviceTypesAndRoles, List<SpinnakerService.TypeAndRole> excludeServiceTypesAndRoles) {
     DeploymentConfiguration deploymentConfiguration = deploymentService.getDeploymentConfiguration(deploymentName);
     DeploymentDetails deploymentDetails = getDeploymentDetails(deploymentConfiguration);
     Deployer deployer = getDeployer(deploymentConfiguration);
     SpinnakerServiceProvider<DeploymentDetails> serviceProvider = serviceProviderFactory.create(deploymentConfiguration);
     SpinnakerRuntimeSettings runtimeSettings = serviceProvider.buildRuntimeSettings(deploymentConfiguration);
 
-    List<SpinnakerService.Type> serviceTypes = serviceNames.stream()
-        .map(SpinnakerService.Type::fromCanonicalName)
-        .collect(Collectors.toList());
-
-    if (serviceTypes.isEmpty()) {
-      serviceTypes = serviceProvider
+    if (serviceTypesAndRoles.isEmpty()) {
+      serviceTypesAndRoles = serviceProvider
           .getServices()
           .stream()
-          .map(SpinnakerService::getType)
+          .map(SpinnakerService::getTypeAndRole)
           .collect(Collectors.toList());
     }
 
-    if (!excludeServiceNames.isEmpty()) {
-      serviceTypes = serviceTypes
+    if (!excludeServiceTypesAndRoles.isEmpty()) {
+      serviceTypesAndRoles = serviceTypesAndRoles
           .stream()
-          .filter(serviceType -> !excludeServiceNames.contains(serviceType.getCanonicalName()))
+          .filter(serviceTypeAndRole -> !excludeServiceTypesAndRoles.contains(serviceTypeAndRole))
           .collect(Collectors.toList());
     }
 
-    RemoteAction action = deployer.prep(serviceProvider, deploymentDetails, runtimeSettings, serviceTypes);
+    RemoteAction action = deployer.prep(serviceProvider, deploymentDetails, runtimeSettings, serviceTypesAndRoles);
 
     if (!action.getScript().isEmpty()) {
       action.commitScript(halconfigDirectoryStructure.getPrepScriptPath(deploymentName));
@@ -237,27 +230,22 @@ public class DeployService {
     return action;
   }
 
-  public RemoteAction deploy(String deploymentName, List<DeployOption> deployOptions, List<String>
-      serviceNames, List<String> excludeServiceNames) {
+  public RemoteAction deploy(String deploymentName, List<DeployOption> deployOptions, List<SpinnakerService.TypeAndRole> serviceTypesAndRoles, List<SpinnakerService.TypeAndRole> excludeServiceTypesAndRoles) {
     DeploymentConfiguration deploymentConfiguration = deploymentService.getDeploymentConfiguration(deploymentName);
     SpinnakerServiceProvider<DeploymentDetails> serviceProvider = serviceProviderFactory.create(deploymentConfiguration);
 
-    List<SpinnakerService.Type> serviceTypes = serviceNames.stream()
-        .map(SpinnakerService.Type::fromCanonicalName)
-        .collect(Collectors.toList());
-
-    if (serviceTypes.isEmpty()) {
-      serviceTypes = serviceProvider
+    if (serviceTypesAndRoles.isEmpty()) {
+      serviceTypesAndRoles = serviceProvider
           .getServices()
           .stream()
-          .map(SpinnakerService::getType)
+          .map(SpinnakerService::getTypeAndRole)
           .collect(Collectors.toList());
     }
 
-    if (!excludeServiceNames.isEmpty()) {
-      serviceTypes = serviceTypes
+    if (!excludeServiceTypesAndRoles.isEmpty()) {
+      serviceTypesAndRoles = serviceTypesAndRoles
           .stream()
-          .filter(serviceType -> !excludeServiceNames.contains(serviceType.getCanonicalName()))
+          .filter(serviceTypeAndRole -> !excludeServiceTypesAndRoles.contains(serviceTypeAndRole))
           .collect(Collectors.toList());
     }
 
@@ -265,7 +253,7 @@ public class DeployService {
     if (deployOptions.contains(DeployOption.OMIT_CONFIG)) {
       resolvedConfiguration = generateService.generateConfig(deploymentName, Collections.emptyList());
     } else {
-      resolvedConfiguration = generateService.generateConfig(deploymentName, serviceTypes);
+      resolvedConfiguration = generateService.generateConfig(deploymentName, serviceTypesAndRoles);
     }
 
     Path serviceSettingsPath = halconfigDirectoryStructure.getServiceSettingsPath(deploymentName);
@@ -277,7 +265,7 @@ public class DeployService {
     Deployer deployer = getDeployer(deploymentConfiguration);
     DeploymentDetails deploymentDetails = getDeploymentDetails(deploymentConfiguration);
 
-    RemoteAction action = deployer.deploy(serviceProvider, deploymentDetails, resolvedConfiguration, serviceTypes);
+    RemoteAction action = deployer.deploy(serviceProvider, deploymentDetails, resolvedConfiguration, serviceTypesAndRoles);
     halconfigParser.backupConfig();
 
     if (deployOptions.contains(DeployOption.FLUSH_INFRASTRUCTURE_CACHES)) {

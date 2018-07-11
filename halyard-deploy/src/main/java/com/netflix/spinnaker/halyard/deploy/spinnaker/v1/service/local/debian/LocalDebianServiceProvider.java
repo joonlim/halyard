@@ -81,39 +81,41 @@ public class LocalDebianServiceProvider extends LocalServiceProvider {
 
   @Override
   public String getInstallCommand(DeploymentDetails deploymentDetails, GenerateService.ResolvedConfiguration resolvedConfiguration, Map<String, String> installCommands) {
-    Map<String, Object> bindings = new HashMap<>();
-    List<SpinnakerService.Type> serviceTypes = new ArrayList<>(installCommands.keySet()).stream()
-        .map(SpinnakerService.Type::fromCanonicalName)
-        .collect(Collectors.toList());
-    List<String> upstartNames = getLocalServices(serviceTypes)
-        .stream()
-        .filter(i -> resolvedConfiguration.getServiceSettings(i.getService()).getEnabled())
-        .map(i -> ((LocalDebianService) i).getUpstartServiceName())
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
-    List<String> systemdServiceConfigs = upstartNames.stream()
-        .map(n -> n + ".service")
-        .collect(Collectors.toList());
-    List<String> serviceInstalls = serviceTypes.stream()
-        .map(t -> installCommands.get(t.getCanonicalName()))
-        .collect(Collectors.toList());
-
-    TemplatedResource resource = new StringReplaceJarResource("/debian/init.sh");
-    bindings.put("services", Strings.join(upstartNames, " "));
-    bindings.put("systemd-service-configs", Strings.join(systemdServiceConfigs, " "));
-    String upstartInit = resource.setBindings(bindings).toString();
-    BillOfMaterials.ArtifactSources artifactSources = artifactService.getArtifactSources(deploymentDetails.getDeploymentName());
-
-    resource = new StringReplaceJarResource("/debian/install.sh");
-    bindings = new HashMap<>();
-    bindings.put("prepare-environment", "true");
-    bindings.put("install-redis", "true");
-    bindings.put("debian-repository", artifactSourcesConfig.mergeWithBomSources(artifactSources).getDebianRepository());
-    bindings.put("install-commands", String.join("\n", serviceInstalls));
-    bindings.put("service-action", "restart");
-    bindings.put("upstart-init", upstartInit);
-
-    return resource.setBindings(bindings).toString();
+    // TODO
+    return null;
+    // Map<String, Object> bindings = new HashMap<>();
+    // List<SpinnakerService.Type> serviceTypes = new ArrayList<>(installCommands.keySet()).stream()
+    //     .map(SpinnakerService.Type::fromCanonicalName)
+    //     .collect(Collectors.toList());
+    // List<String> upstartNames = getLocalServices(serviceTypes)
+    //     .stream()
+    //     .filter(i -> resolvedConfiguration.getServiceSettings(i.getService()).getEnabled())
+    //     .map(i -> ((LocalDebianService) i).getUpstartServiceName())
+    //     .filter(Objects::nonNull)
+    //     .collect(Collectors.toList());
+    // List<String> systemdServiceConfigs = upstartNames.stream()
+    //     .map(n -> n + ".service")
+    //     .collect(Collectors.toList());
+    // List<String> serviceInstalls = serviceTypes.stream()
+    //     .map(t -> installCommands.get(t.getCanonicalName()))
+    //     .collect(Collectors.toList());
+    //
+    // TemplatedResource resource = new StringReplaceJarResource("/debian/init.sh");
+    // bindings.put("services", Strings.join(upstartNames, " "));
+    // bindings.put("systemd-service-configs", Strings.join(systemdServiceConfigs, " "));
+    // String upstartInit = resource.setBindings(bindings).toString();
+    // BillOfMaterials.ArtifactSources artifactSources = artifactService.getArtifactSources(deploymentDetails.getDeploymentName());
+    //
+    // resource = new StringReplaceJarResource("/debian/install.sh");
+    // bindings = new HashMap<>();
+    // bindings.put("prepare-environment", "true");
+    // bindings.put("install-redis", "true");
+    // bindings.put("debian-repository", artifactSourcesConfig.mergeWithBomSources(artifactSources).getDebianRepository());
+    // bindings.put("install-commands", String.join("\n", serviceInstalls));
+    // bindings.put("service-action", "restart");
+    // bindings.put("upstart-init", upstartInit);
+    //
+    // return resource.setBindings(bindings).toString();
   }
 
   @Override

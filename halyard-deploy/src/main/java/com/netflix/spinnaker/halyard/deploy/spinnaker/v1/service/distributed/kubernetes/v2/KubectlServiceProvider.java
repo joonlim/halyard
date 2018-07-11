@@ -83,9 +83,9 @@ public class KubectlServiceProvider extends SpinnakerServiceProvider<AccountDepl
     return new RemoteAction();
   }
 
-  public List<KubernetesV2Service> getServicesByPriority(List<SpinnakerService.Type> serviceTypes) {
+  public List<KubernetesV2Service> getServicesByPriority(List<SpinnakerService.TypeAndRole> serviceTypesAndRoles) {
     List<KubernetesV2Service> result = getFieldsOfType(KubernetesV2Service.class).stream()
-        .filter(d -> serviceTypes.contains(d.getService().getType()))
+        .filter(d -> serviceTypesAndRoles.contains(d.getService().getTypeAndRole()))
         .collect(Collectors.toList());
 
     if (result.removeIf(s -> s.getService().getType() == SpinnakerService.Type.REDIS)) {
@@ -95,8 +95,13 @@ public class KubectlServiceProvider extends SpinnakerServiceProvider<AccountDepl
     return result;
   }
 
-  public KubernetesV2Service getService(SpinnakerService.Type type) {
-    return getService(type, Object.class);
+  public KubernetesV2Service getService(SpinnakerService.TypeAndRole typeAndRole) {
+    // return getService(typeAndRole, Object.class);
+    return getFieldsOfType(KubernetesV2Service.class)
+        .stream()
+        .filter(s -> s != null && typeAndRole.equals(s.getService().getTypeAndRole()))
+        .findFirst()
+        .get(); // TODO
   }
 
   public <S> KubernetesV2Service getService(SpinnakerService.Type type, Class<S> clazz) {

@@ -30,7 +30,7 @@ public interface Deployer<S extends SpinnakerServiceProvider<D>, D extends Deplo
       S serviceProvider,
       D deploymentDetails,
       ResolvedConfiguration resolvedConfiguration,
-      List<SpinnakerService.Type> serviceTypes);
+      List<SpinnakerService.TypeAndRole> serviceTypeAndRoles);
 
   void rollback(
       S serviceProvider,
@@ -48,7 +48,7 @@ public interface Deployer<S extends SpinnakerServiceProvider<D>, D extends Deplo
       S serviceProvider,
       D deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes);
+      List<SpinnakerService.TypeAndRole> serviceTypesAndRoles);
 
   default RemoteAction clean(
       S serviceProvider,
@@ -68,7 +68,7 @@ public interface Deployer<S extends SpinnakerServiceProvider<D>, D extends Deplo
       S serviceProvider,
       D deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes
+      List<SpinnakerService.TypeAndRole> serviceTypeAndRoles
   ) {
     RemoteAction result = new RemoteAction();
     result.setAutoRun(true);

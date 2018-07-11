@@ -44,8 +44,8 @@ public class LocalDeployer implements Deployer<LocalServiceProvider, DeploymentD
       LocalServiceProvider serviceProvider,
       DeploymentDetails deploymentDetails,
       GenerateService.ResolvedConfiguration resolvedConfiguration,
-      List<SpinnakerService.Type> serviceTypes) {
-    List<LocalService> enabledServices = serviceProvider.getLocalServices(serviceTypes)
+      List<SpinnakerService.TypeAndRole> serviceTypesAndRoles) {
+    List<LocalService> enabledServices = serviceProvider.getLocalServices(serviceTypesAndRoles)
         .stream()
         .filter(i -> resolvedConfiguration.getServiceSettings(i.getService()) != null)
         .filter(i -> {
@@ -88,9 +88,10 @@ public class LocalDeployer implements Deployer<LocalServiceProvider, DeploymentD
   @Override
   public void collectLogs(LocalServiceProvider serviceProvider, DeploymentDetails deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings, List<SpinnakerService.Type> serviceTypes) {
-    for (LocalService localService : serviceProvider.getLocalServices(serviceTypes)) {
-      localService.collectLogs(deploymentDetails, runtimeSettings);
-    }
+    // TODO(joonlim)
+    // for (LocalService localService : serviceProvider.getLocalServices(serviceTypes)) {
+    //   localService.collectLogs(deploymentDetails, runtimeSettings);
+    // }
   }
 
   @Override
@@ -98,7 +99,7 @@ public class LocalDeployer implements Deployer<LocalServiceProvider, DeploymentD
       LocalServiceProvider serviceProvider,
       DeploymentDetails deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes) {
+      List<SpinnakerService.TypeAndRole> serviceTypeAndRoles) {
     RemoteAction result = new RemoteAction();
     result.setScript(String.join("\n",
         "#!/usr/bin/env bash",

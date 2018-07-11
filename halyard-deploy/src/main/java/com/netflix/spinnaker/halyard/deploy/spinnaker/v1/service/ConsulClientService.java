@@ -93,7 +93,7 @@ abstract public class ConsulClientService extends SpinnakerService<ConsulApi> im
   @Override
   public List<Profile> getSidecarProfiles(GenerateService.ResolvedConfiguration resolvedConfiguration, SpinnakerService service) {
     List<Profile> result = new ArrayList<>();
-    Map<String, Profile> profiles = resolvedConfiguration.getProfilesForService(getType());
+    Map<String, Profile> profiles = resolvedConfiguration.getProfilesForService(getTypeAndRole());
     Profile profile = profiles.get(consulClientService(service.getCanonicalName()));
     result.add(profile);
     profile = profiles.get(clientProfileName);

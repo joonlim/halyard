@@ -144,12 +144,16 @@ public class DeploymentController extends DeploymentsGrpc.DeploymentsImplBase{
   DaemonTask<Halconfig, Void> generateConfig(@PathVariable String deploymentName,
       @RequestParam(required = false, defaultValue = DefaultControllerValues.validate) boolean validate,
       @RequestParam(required = false, defaultValue = DefaultControllerValues.severity) Severity severity,
-      @RequestParam(required = false) List<String> serviceNames) {
-    List<String> finalServiceNames = serviceNames != null ? serviceNames : Collections.emptyList();
+      @RequestParam(required = false) List<String> serviceTypesAndRoles) {
+    List<SpinnakerService.TypeAndRole> finalServiceTypesAndRoles = serviceTypesAndRoles != null ?
+        serviceTypesAndRoles.stream().map(s -> {
+          String[] split = s.split("/");
+          return split.length == 2 ?
+              SpinnakerService.TypeAndRole.of(SpinnakerService.Type.fromCanonicalName(split[0]), split[1]) :
+              SpinnakerService.TypeAndRole.ofDefaultRole(SpinnakerService.Type.fromCanonicalName(split[0]));
+        }).collect(Collectors.toList()): Collections.emptyList();
     Supplier buildResponse = () -> {
-      generateService.generateConfig(deploymentName, finalServiceNames.stream()
-          .map(SpinnakerService.Type::fromCanonicalName)
-          .collect(Collectors.toList()));
+      generateService.generateConfig(deploymentName, finalServiceTypesAndRoles);
       return null;
     };
     StaticRequestBuilder<Void> builder = new StaticRequestBuilder<>(buildResponse);
@@ -185,10 +189,16 @@ public class DeploymentController extends DeploymentsGrpc.DeploymentsImplBase{
   DaemonTask<Halconfig, RemoteAction> connect(@PathVariable String deploymentName,
       @RequestParam(required = false, defaultValue = DefaultControllerValues.validate) boolean validate,
       @RequestParam(required = false, defaultValue = DefaultControllerValues.severity) Severity severity,
-      @RequestParam(required = false) List<String> serviceNames) {
-    List<String> finalServiceNames = serviceNames == null ? new ArrayList<>() : serviceNames;
+      @RequestParam(required = false) List<String> serviceTypesAndRoles) {
+    List<SpinnakerService.TypeAndRole> finalServiceTypesAndRoles = serviceTypesAndRoles != null ?
+        serviceTypesAndRoles.stream().map(s -> {
+          String[] split = s.split("/");
+          return split.length == 2 ?
+              SpinnakerService.TypeAndRole.of(SpinnakerService.Type.fromCanonicalName(split[0]), split[1]) :
+              SpinnakerService.TypeAndRole.ofDefaultRole(SpinnakerService.Type.fromCanonicalName(split[0]));
+        }).collect(Collectors.toList()): new ArrayList<>();
     StaticRequestBuilder<RemoteAction> builder = new StaticRequestBuilder<>(
-        () -> deployService.connectCommand(deploymentName, finalServiceNames));
+        () -> deployService.connectCommand(deploymentName, finalServiceTypesAndRoles));
     builder.setSeverity(severity);
 
     if (validate) {
@@ -199,6 +209,7 @@ public class DeploymentController extends DeploymentsGrpc.DeploymentsImplBase{
     return DaemonTaskHandler.submitTask(builder::build, "Connect to Spinnaker deployment.");
   }
 
+  // TODO(joonlim)
   @RequestMapping(value = "/{deploymentName:.+}/rollback/", method = RequestMethod.POST)
   DaemonTask<Halconfig, Void> rollback(@PathVariable String deploymentName,
       @RequestParam(required = false, defaultValue = DefaultControllerValues.validate) boolean validate,
@@ -229,13 +240,24 @@ public class DeploymentController extends DeploymentsGrpc.DeploymentsImplBase{
   DaemonTask<Halconfig, RemoteAction> prep(@PathVariable String deploymentName,
       @RequestParam(required = false, defaultValue = DefaultControllerValues.validate) boolean validate,
       @RequestParam(required = false, defaultValue = DefaultControllerValues.severity) Severity severity,
-      @RequestParam(required = false) List<String> serviceNames,
-      @RequestParam(required = false) List<String> excludeServiceNames) {
-    List<String> finalServiceNames = serviceNames != null ? serviceNames : Collections.emptyList();
-    List<String> finalExcludeServiceNames =
-        excludeServiceNames != null ? excludeServiceNames : Collections.emptyList();
+      @RequestParam(required = false) List<String> serviceTypesAndRoles,
+      @RequestParam(required = false) List<String> excludeServiceTypesAndRoles) {
+    List<SpinnakerService.TypeAndRole> finalServiceTypesAndRoles = serviceTypesAndRoles != null ?
+        serviceTypesAndRoles.stream().map(s -> {
+          String[] split = s.split("/");
+          return split.length == 2 ?
+              SpinnakerService.TypeAndRole.of(SpinnakerService.Type.fromCanonicalName(split[0]), split[1]) :
+              SpinnakerService.TypeAndRole.ofDefaultRole(SpinnakerService.Type.fromCanonicalName(split[0]));
+        }).collect(Collectors.toList()): Collections.emptyList();
+    List<SpinnakerService.TypeAndRole> finalExcludeServiceTypesAndRoles = excludeServiceTypesAndRoles != null ?
+        excludeServiceTypesAndRoles.stream().map(s -> {
+          String[] split = s.split("/");
+          return split.length == 2 ?
+              SpinnakerService.TypeAndRole.of(SpinnakerService.Type.fromCanonicalName(split[0]), split[1]) :
+              SpinnakerService.TypeAndRole.ofDefaultRole(SpinnakerService.Type.fromCanonicalName(split[0]));
+        }).collect(Collectors.toList()): Collections.emptyList();
     StaticRequestBuilder<RemoteAction> builder = new StaticRequestBuilder<>(
-        () -> deployService.prep(deploymentName, finalServiceNames, finalExcludeServiceNames));
+        () -> deployService.prep(deploymentName, finalServiceTypesAndRoles, finalExcludeServiceTypesAndRoles));
     builder.setSeverity(severity);
 
     if (validate) {
@@ -251,16 +273,27 @@ public class DeploymentController extends DeploymentsGrpc.DeploymentsImplBase{
       @RequestParam(required = false, defaultValue = DefaultControllerValues.validate) boolean validate,
       @RequestParam(required = false, defaultValue = DefaultControllerValues.severity) Severity severity,
       @RequestParam(required = false) List<DeployOption> deployOptions,
-      @RequestParam(required = false) List<String> serviceNames,
-      @RequestParam(required = false) List<String> excludeServiceNames) {
+      @RequestParam(required = false) List<String> serviceTypesAndRoles,
+      @RequestParam(required = false) List<String> excludeServiceTypesAndRoles) {
     List<DeployOption> finalDeployOptions =
         deployOptions != null ? deployOptions : Collections.emptyList();
-    List<String> finalServiceNames = serviceNames != null ? serviceNames : Collections.emptyList();
-    List<String> finalExcludeServiceNames =
-        excludeServiceNames != null ? excludeServiceNames : Collections.emptyList();
+    List<SpinnakerService.TypeAndRole> finalServiceTypesAndRoles = serviceTypesAndRoles != null ?
+        serviceTypesAndRoles.stream().map(s -> {
+          String[] split = s.split("/");
+          return split.length == 2 ?
+              SpinnakerService.TypeAndRole.of(SpinnakerService.Type.fromCanonicalName(split[0]), split[1]) :
+              SpinnakerService.TypeAndRole.ofDefaultRole(SpinnakerService.Type.fromCanonicalName(split[0]));
+        }).collect(Collectors.toList()): Collections.emptyList();
+    List<SpinnakerService.TypeAndRole> finalExcludeServiceTypesAndRoles = excludeServiceTypesAndRoles != null ?
+        excludeServiceTypesAndRoles.stream().map(s -> {
+          String[] split = s.split("/");
+          return split.length == 2 ?
+              SpinnakerService.TypeAndRole.of(SpinnakerService.Type.fromCanonicalName(split[0]), split[1]) :
+              SpinnakerService.TypeAndRole.ofDefaultRole(SpinnakerService.Type.fromCanonicalName(split[0]));
+        }).collect(Collectors.toList()): Collections.emptyList();
     StaticRequestBuilder<RemoteAction> builder = new StaticRequestBuilder<>(
         () -> deployService.deploy(deploymentName, finalDeployOptions,
-            finalServiceNames, finalExcludeServiceNames));
+            finalServiceTypesAndRoles, finalExcludeServiceTypesAndRoles));
     builder.setSeverity(severity);
 
     if (validate) {
@@ -287,6 +320,7 @@ public class DeploymentController extends DeploymentsGrpc.DeploymentsImplBase{
     responseObserver.onCompleted();
   }
 
+  // TODO(joonlim)
   @RequestMapping(value = "/{deploymentName:.+}/collectLogs/", method = RequestMethod.PUT)
   DaemonTask<Halconfig, Void> collectLogs(@PathVariable String deploymentName,
       @RequestParam(required = false, defaultValue = DefaultControllerValues.validate) boolean validate,

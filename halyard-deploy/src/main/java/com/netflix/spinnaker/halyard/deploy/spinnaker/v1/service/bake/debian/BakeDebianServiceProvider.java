@@ -103,36 +103,38 @@ public class BakeDebianServiceProvider extends BakeServiceProvider {
 
   @Override
   public String getInstallCommand(DeploymentDetails deploymentDetails, GenerateService.ResolvedConfiguration resolvedConfiguration, Map<String, String> installCommands, String startupCommand) {
-    Map<String, Object> bindings = new HashMap<>();
-    List<SpinnakerService.Type> serviceTypes = new ArrayList<>(installCommands.keySet()).stream().map(SpinnakerService.Type::fromCanonicalName).collect(Collectors.toList());
-    List<String> upstartNames = getPrioritizedBakeableServices(serviceTypes)
-        .stream()
-        .filter(i -> resolvedConfiguration.getServiceSettings(i.getService()).getEnabled())
-        .map(i -> ((BakeDebianService) i).getUpstartServiceName())
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
-    List<String> systemdServiceConfigs = upstartNames.stream()
-        .map(n -> n + ".service")
-        .collect(Collectors.toList());
-    List<String> serviceInstalls = serviceTypes.stream()
-        .map(t -> installCommands.get(t.getCanonicalName()))
-        .collect(Collectors.toList());
-
-    TemplatedResource resource = new StringReplaceJarResource("/debian/init.sh");
-    bindings.put("services", Strings.join(upstartNames, " "));
-    bindings.put("systemd-service-configs", Strings.join(systemdServiceConfigs, " "));
-    String upstartInit = resource.setBindings(bindings).toString();
-    BillOfMaterials.ArtifactSources artifactSources = artifactService.getArtifactSources(deploymentDetails.getDeploymentName());
-
-    resource = new StringReplaceJarResource("/debian/pre-bake.sh");
-    bindings = new HashMap<>();
-    bindings.put("debian-repository", artifactSourcesConfig.mergeWithBomSources(artifactSources).getDebianRepository());
-    bindings.put("install-commands", String.join("\n", serviceInstalls));
-    bindings.put("upstart-init", upstartInit);
-    bindings.put("startup-file", Paths.get(startupScriptPath, "startup.sh").toString());
-    bindings.put("startup-command", startupCommand);
-
-    return resource.setBindings(bindings).toString();
+    // TODO
+    return null;
+    // Map<String, Object> bindings = new HashMap<>();
+    // List<SpinnakerService.Type> serviceTypes = new ArrayList<>(installCommands.keySet()).stream().map(SpinnakerService.Type::fromCanonicalName).collect(Collectors.toList());
+    // List<String> upstartNames = getPrioritizedBakeableServices(serviceTypes)
+    //     .stream()
+    //     .filter(i -> resolvedConfiguration.getServiceSettings(i.getService()).getEnabled())
+    //     .map(i -> ((BakeDebianService) i).getUpstartServiceName())
+    //     .filter(Objects::nonNull)
+    //     .collect(Collectors.toList());
+    // List<String> systemdServiceConfigs = upstartNames.stream()
+    //     .map(n -> n + ".service")
+    //     .collect(Collectors.toList());
+    // List<String> serviceInstalls = serviceTypes.stream()
+    //     .map(t -> installCommands.get(t.getCanonicalName()))
+    //     .collect(Collectors.toList());
+    //
+    // TemplatedResource resource = new StringReplaceJarResource("/debian/init.sh");
+    // bindings.put("services", Strings.join(upstartNames, " "));
+    // bindings.put("systemd-service-configs", Strings.join(systemdServiceConfigs, " "));
+    // String upstartInit = resource.setBindings(bindings).toString();
+    // BillOfMaterials.ArtifactSources artifactSources = artifactService.getArtifactSources(deploymentDetails.getDeploymentName());
+    //
+    // resource = new StringReplaceJarResource("/debian/pre-bake.sh");
+    // bindings = new HashMap<>();
+    // bindings.put("debian-repository", artifactSourcesConfig.mergeWithBomSources(artifactSources).getDebianRepository());
+    // bindings.put("install-commands", String.join("\n", serviceInstalls));
+    // bindings.put("upstart-init", upstartInit);
+    // bindings.put("startup-file", Paths.get(startupScriptPath, "startup.sh").toString());
+    // bindings.put("startup-command", startupCommand);
+    //
+    // return resource.setBindings(bindings).toString();
   }
 
   @Override

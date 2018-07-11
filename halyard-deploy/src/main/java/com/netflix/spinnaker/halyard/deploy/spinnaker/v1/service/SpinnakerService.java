@@ -29,6 +29,7 @@ import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.CustomProfileFa
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.ProfileFactory;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,6 +104,14 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
     return (version != null);
   }
 
+  public String getRole() {
+    return TypeAndRole.DEFAULT_ROLE;
+  }
+
+  public TypeAndRole getTypeAndRole() {
+    return TypeAndRole.of(getType(), getRole());
+  }
+
   abstract public Type getType();
   abstract public Class<T> getEndpointClass();
   abstract public List<Profile> getProfiles(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints);
@@ -130,6 +139,29 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
 
       return Optional.of(factory.getProfile(profileName, outputPath, deploymentConfiguration, runtimeSettings));
     });
+  }
+
+  @EqualsAndHashCode
+  public static class TypeAndRole {
+    public static final String DEFAULT_ROLE = "";
+
+    @Getter
+    final Type type;
+    @Getter
+    final String role;
+
+    public TypeAndRole(Type type, String role) {
+      this.type = type;
+      this.role = role;
+    }
+
+    public static TypeAndRole of(Type type, String role) {
+      return new TypeAndRole(type, role);
+    }
+
+    public static TypeAndRole ofDefaultRole(Type type) {
+      return new TypeAndRole(type, DEFAULT_ROLE);
+    }
   }
 
   public enum Type {

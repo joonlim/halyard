@@ -200,7 +200,7 @@ public interface GoogleDistributedService<T> extends DistributedService<T, Googl
       }
     }
 
-    Map<String, Profile> serviceProfiles = resolvedConfiguration.getProfilesForService(thisService.getType());
+    Map<String, Profile> serviceProfiles = resolvedConfiguration.getProfilesForService(thisService.getTypeAndRole());
     Set<String> requiredFiles = new HashSet<>();
 
     for (Map.Entry<String, Profile> entry : serviceProfiles.entrySet()) {

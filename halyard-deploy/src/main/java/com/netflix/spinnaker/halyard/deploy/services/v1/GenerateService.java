@@ -82,10 +82,10 @@ public class GenerateService {
    *      the deployment.
    *
    * @param deploymentName is the deployment whose config to generate
-   * @param services is the list of services to generate configs for
+   * @param serviceTypesAndRoles is the list of services to generate configs for
    * @return a mapping from components to the profile's required local files.
    */
-  public ResolvedConfiguration generateConfig(String deploymentName, List<SpinnakerService.Type> services) {
+  public ResolvedConfiguration generateConfig(String deploymentName, List<SpinnakerService.TypeAndRole> serviceTypesAndRoles) {
     DaemonTaskHandler.newStage("Generating all Spinnaker profile files and endpoints");
     log.info("Generating config from \"" + halconfigPath + "\" with deploymentName \"" + deploymentName + "\"");
     File spinnakerStaging = halconfigDirectoryStructure.getStagingPath(deploymentName).toFile();
@@ -107,11 +107,11 @@ public class GenerateService {
     List<String> userProfileNames = aggregateProfilesInPath(userProfilePath.toString(), "");
 
     // Step 2.
-    Map<SpinnakerService.Type, Map<String, Profile>> serviceProfiles = new HashMap<>();
+    Map<SpinnakerService.TypeAndRole, Map<String, Profile>> serviceProfiles = new HashMap<>();
     for (SpinnakerService service : serviceProvider.getServices()) {
-      boolean isDesiredService = services
+      boolean isDesiredService = serviceTypesAndRoles
           .stream()
-          .filter(s -> s.equals(service.getType()))
+          .filter(s -> s.equals(service.getTypeAndRole()))
           .count() > 0;
 
       if (!isDesiredService) {
@@ -140,7 +140,7 @@ public class GenerateService {
       DaemonTaskHandler.message(profileMessage);
       mergeProfilesAndPreserveProperties(outputProfiles, processProfiles(spinnakerStaging, customProfiles));
 
-      serviceProfiles.put(service.getType(), outputProfiles);
+      serviceProfiles.put(service.getTypeAndRole(), outputProfiles);
     }
 
     return new ResolvedConfiguration()
@@ -193,7 +193,7 @@ public class GenerateService {
 
   @Data
   public static class ResolvedConfiguration {
-    private Map<SpinnakerService.Type, Map<String, Profile>> serviceProfiles = new HashMap<>();
+    private Map<SpinnakerService.TypeAndRole, Map<String, Profile>> serviceProfiles = new HashMap<>();
     SpinnakerRuntimeSettings runtimeSettings;
 
     @JsonIgnore
@@ -202,8 +202,8 @@ public class GenerateService {
     }
 
     @JsonIgnore
-    public Map<String, Profile> getProfilesForService(SpinnakerService.Type type) {
-      return serviceProfiles.getOrDefault(type, new HashMap<>());
+    public Map<String, Profile> getProfilesForService(SpinnakerService.TypeAndRole serviceTypeAndRole) {
+      return serviceProfiles.getOrDefault(serviceTypeAndRole, new HashMap<>());
     }
   }
 }

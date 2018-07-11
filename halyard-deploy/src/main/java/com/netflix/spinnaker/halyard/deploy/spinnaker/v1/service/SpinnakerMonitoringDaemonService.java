@@ -98,7 +98,7 @@ abstract public class SpinnakerMonitoringDaemonService extends SpinnakerService<
   @Override
   public List<Profile> getSidecarProfiles(GenerateService.ResolvedConfiguration resolvedConfiguration, SpinnakerService service) {
     List<Profile> result = new ArrayList<>();
-    Map<String, Profile> monitoringProfiles = resolvedConfiguration.getProfilesForService(getType());
+    Map<String, Profile> monitoringProfiles = resolvedConfiguration.getProfilesForService(getTypeAndRole());
 
     String profileName = serviceRegistryProfileName(service.getCanonicalName());
     Profile profile = monitoringProfiles.get(profileName);

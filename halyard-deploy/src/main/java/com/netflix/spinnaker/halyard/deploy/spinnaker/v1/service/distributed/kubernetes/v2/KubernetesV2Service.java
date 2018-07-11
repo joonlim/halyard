@@ -204,7 +204,7 @@ public interface KubernetesV2Service<T> extends HasServiceSettings<T> {
 
   default List<ConfigSource> stageConfig(AccountDeploymentDetails<KubernetesAccount> details,
       GenerateService.ResolvedConfiguration resolvedConfiguration) {
-    Map<String, Profile> profiles = resolvedConfiguration.getProfilesForService(getService().getType());
+    Map<String, Profile> profiles = resolvedConfiguration.getProfilesForService(getService().getTypeAndRole());
     String stagingPath = getSpinnakerStagingPath(details.getDeploymentName());
     SpinnakerRuntimeSettings runtimeSettings = resolvedConfiguration.getRuntimeSettings();
 

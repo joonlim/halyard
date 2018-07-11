@@ -34,7 +34,7 @@ public interface BakeService<T> extends HasServiceSettings<T> {
   String getStartupCommand();
 
   default String stageStartupScripts(DeploymentDetails details, GenerateService.ResolvedConfiguration resolvedConfiguration) {
-    Map<String, Profile> profiles = resolvedConfiguration.getProfilesForService(getService().getType());
+    Map<String, Profile> profiles = resolvedConfiguration.getProfilesForService(getService().getTypeAndRole());
 
     List<String> allCommands = new ArrayList<>();
     for (Map.Entry<String, Profile> entry : profiles.entrySet()) {

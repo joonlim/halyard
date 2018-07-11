@@ -41,8 +41,8 @@ public class BakeDeployer implements Deployer<BakeServiceProvider, DeploymentDet
       BakeServiceProvider serviceProvider,
       DeploymentDetails deploymentDetails,
       GenerateService.ResolvedConfiguration resolvedConfiguration,
-      List<SpinnakerService.Type> serviceTypes) {
-    List<BakeService> enabledServices = serviceProvider.getPrioritizedBakeableServices(serviceTypes)
+      List<SpinnakerService.TypeAndRole> serviceTypesAndRoles) {
+    List<BakeService> enabledServices = serviceProvider.getPrioritizedBakeableServices(serviceTypesAndRoles)
         .stream()
         .filter(i -> {
           ServiceSettings serviceSettings = resolvedConfiguration.getServiceSettings(i.getService());
@@ -88,7 +88,7 @@ public class BakeDeployer implements Deployer<BakeServiceProvider, DeploymentDet
   }
 
   @Override
-  public RemoteAction connectCommand(BakeServiceProvider serviceProvider, DeploymentDetails deploymentDetails, SpinnakerRuntimeSettings runtimeSettings, List<SpinnakerService.Type> serviceTypes) {
+  public RemoteAction connectCommand(BakeServiceProvider serviceProvider, DeploymentDetails deploymentDetails, SpinnakerRuntimeSettings runtimeSettings, List<SpinnakerService.TypeAndRole> serviceTypesAndRoles) {
     throw new HalException(Problem.Severity.FATAL, "This type of deployment cannot be run or connected to.");
   }
 

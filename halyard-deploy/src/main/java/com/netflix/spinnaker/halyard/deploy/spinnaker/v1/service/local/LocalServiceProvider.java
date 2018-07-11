@@ -57,10 +57,10 @@ abstract public class LocalServiceProvider extends SpinnakerServiceProvider<Depl
     return "";
   }
 
-  public List<LocalService> getLocalServices(List<SpinnakerService.Type> serviceTypes) {
+  public List<LocalService> getLocalServices(List<SpinnakerService.TypeAndRole> serviceTypesAndRoles) {
     return getFieldsOfType(LocalService.class)
         .stream()
-        .filter(s -> s != null && serviceTypes.contains(s.getService().getType()))
+        .filter(s -> s != null && serviceTypesAndRoles.contains(s.getService().getTypeAndRole()))
         .collect(Collectors.toList());
   }
 }
