@@ -51,6 +51,7 @@ abstract public class ProfileFactory {
     return artifactService;
   }
 
+  // TODO: should this take TypeAndRole rather than just Role?
   public Profile getProfile(String name, String outputFile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role) {
     String deploymentName = deploymentConfiguration.getName();
     String version = getArtifactService().getArtifactVersion(deploymentName, getArtifact());
@@ -63,6 +64,7 @@ abstract public class ProfileFactory {
     return result;
   }
 
+  // TODO: should this take TypeAndRole rather than just Role?
   abstract protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints, String role);
 
   abstract protected Profile getBaseProfile(String name, String version, String outputFile);

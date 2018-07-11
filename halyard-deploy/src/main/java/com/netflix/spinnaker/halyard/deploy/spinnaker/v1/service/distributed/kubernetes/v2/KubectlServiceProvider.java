@@ -42,6 +42,9 @@ public class KubectlServiceProvider extends SpinnakerServiceProvider<AccountDepl
   KubernetesV2ClouddriverService clouddriverService;
 
   @Autowired
+  KubernetesV2ClouddriverRoService clouddriverRoService;
+
+  @Autowired
   KubernetesV2DeckService deckService;
 
   @Autowired
@@ -101,7 +104,7 @@ public class KubectlServiceProvider extends SpinnakerServiceProvider<AccountDepl
         .stream()
         .filter(s -> s != null && typeAndRole.equals(s.getService().getTypeAndRole()))
         .findFirst()
-        .get(); // TODO
+        .get(); // TODO: check and throw if empty or > 1
   }
 
   public <S> KubernetesV2Service getService(SpinnakerService.Type type, Class<S> clazz) {

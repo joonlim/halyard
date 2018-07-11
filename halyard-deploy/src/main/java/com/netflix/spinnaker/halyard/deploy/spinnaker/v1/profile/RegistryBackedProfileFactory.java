@@ -38,6 +38,10 @@ abstract public class RegistryBackedProfileFactory extends ProfileFactory {
       return new Profile(name,
           version,
           outputFile,
+
+          // TODO: either
+          // 1. split up staging into role directories
+          // 2. staging file uses role name, base uses base name.
           IOUtils.toString(profileRegistry.readProfile(getArtifact().getName(), version, name))
       );
     } catch (RetrofitError | IOException e) {

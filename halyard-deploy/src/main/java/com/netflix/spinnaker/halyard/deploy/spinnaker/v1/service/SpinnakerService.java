@@ -48,6 +48,8 @@ import java.util.Optional;
 @Component
 @Slf4j
 abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
+  public final static String DEFAULT_ROLE = "";
+
   @Autowired
   ObjectMapper objectMapper;
 
@@ -105,7 +107,7 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
   }
 
   public String getRole() {
-    return TypeAndRole.DEFAULT_ROLE;
+    return DEFAULT_ROLE;
   }
 
   public TypeAndRole getTypeAndRole() {
@@ -143,8 +145,6 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
 
   @EqualsAndHashCode
   public static class TypeAndRole {
-    public static final String DEFAULT_ROLE = "";
-
     @Getter
     final Type type;
     @Getter
