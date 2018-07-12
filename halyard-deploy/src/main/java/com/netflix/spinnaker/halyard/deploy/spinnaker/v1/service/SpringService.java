@@ -31,8 +31,12 @@ import java.util.Optional;
 
 @Component
 abstract public class SpringService<T> extends SpinnakerService<T> {
-  protected String getConfigOutputPath() {
+  public static String getSpringServiceConfigOutputPath() {
     return "/opt/spinnaker/config/";
+  }
+
+  protected String getConfigOutputPath() {
+    return getSpringServiceConfigOutputPath();
   }
 
   @Autowired

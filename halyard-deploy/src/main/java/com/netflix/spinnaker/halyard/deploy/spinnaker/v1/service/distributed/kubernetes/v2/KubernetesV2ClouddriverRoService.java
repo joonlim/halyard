@@ -54,8 +54,11 @@ public class KubernetesV2ClouddriverRoService extends ClouddriverService impleme
     generateAwsProfile(deploymentConfiguration, endpoints, getHomeDirectory()).ifPresent(profiles::add);
 
     // Add role's profile
-    Profile roleProfile = new Profile("clouddriver-ro.yml", getArtifactService().getArtifactVersion(deploymentConfiguration.getName(), getArtifact()), Paths
-        .get(getConfigOutputPath(), "clouddriver-ro.yml").toString(), "redis.connection: http://test.com");
+    String contents = "redis.connection: redis://spin-redis-clouddriver-ro.spinnaker:6379";
+    Profile roleProfile = new Profile("clouddriver-ro.yml",
+        getArtifactService().getArtifactVersion(deploymentConfiguration.getName(),getArtifact()),
+        Paths.get(getConfigOutputPath(), "clouddriver-ro.yml").toString(),
+        contents);
     roleProfile.appendContents(roleProfile.getBaseContents());
     roleProfile.getEnv().put("SPRING_PROFILES_ACTIVE", "ro");
     profiles.add(roleProfile);
@@ -69,7 +72,5 @@ public class KubernetesV2ClouddriverRoService extends ClouddriverService impleme
   }
 
   @Override
-  public String getRole() {
-    return "ro";
-  }
+  public String getRole() { return "ro"; }
 }

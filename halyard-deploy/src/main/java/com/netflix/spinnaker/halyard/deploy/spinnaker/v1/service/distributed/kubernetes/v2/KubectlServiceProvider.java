@@ -27,8 +27,9 @@ import com.netflix.spinnaker.halyard.deploy.deployment.v1.AccountDeploymentDetai
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerServiceProvider;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpringService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.KubernetesSharedServiceSettings;
-import lombok.AllArgsConstructor;
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +39,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class KubectlServiceProvider extends SpinnakerServiceProvider<AccountDeploymentDetails<KubernetesAccount>> {
+
+  CustomRoleKubernetesV2Service testService;
+
   @Autowired
   KubernetesV2ClouddriverService clouddriverService;
 
@@ -77,6 +81,20 @@ public class KubectlServiceProvider extends SpinnakerServiceProvider<AccountDepl
   @Autowired
   KubernetesV2RoscoService roscoService;
 
+  @Autowired
+  KubernetesV2RedisClouddriverRoService redisClouddriverRoService;
+
+
+  @Autowired
+  CustomRoleKubernetesV2ServiceFactory runtimeServiceFactory;
+
+  @PostConstruct
+  public void postConstruct() throws Exception {
+    // RoleKubernetesV2Service
+    String contents = "redis.connection: redis://spin-redis-clouddriver-ro.spinnaker:6379";
+    testService = runtimeServiceFactory.newInstance(clouddriverService, "caching", SpringService.getSpringServiceConfigOutputPath(), contents);
+  }
+
   @Override
   public RemoteAction clean(AccountDeploymentDetails<KubernetesAccount> details, SpinnakerRuntimeSettings runtimeSettings) {
     DaemonTaskHandler.newStage("Invoking kubectl");
@@ -91,9 +109,15 @@ public class KubectlServiceProvider extends SpinnakerServiceProvider<AccountDepl
         .filter(d -> serviceTypesAndRoles.contains(d.getService().getTypeAndRole()))
         .collect(Collectors.toList());
 
-    if (result.removeIf(s -> s.getService().getType() == SpinnakerService.Type.REDIS)) {
-      result.add(0, redisService);
-    }
+    result.sort((a, b) -> {
+      if (a.getService().getType() == SpinnakerService.Type.REDIS) {
+        return -1;
+      }
+      if (b.getService().getType() == SpinnakerService.Type.REDIS) {
+        return 1;
+      }
+      return 0;
+    });
 
     return result;
   }

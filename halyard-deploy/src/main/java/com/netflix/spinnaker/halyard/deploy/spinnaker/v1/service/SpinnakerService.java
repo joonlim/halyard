@@ -62,6 +62,15 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
   @Autowired
   HalconfigDirectoryStructure halconfigDirectoryStructure;
 
+  public SpinnakerService() {}
+
+  public SpinnakerService(ObjectMapper objectMapper, ArtifactService artifactService, Yaml yamlParser, HalconfigDirectoryStructure halconfigDirectoryStructure) {
+    this.objectMapper = objectMapper;
+    this.artifactService = artifactService;
+    this.yamlParser = yamlParser;
+    this.halconfigDirectoryStructure = halconfigDirectoryStructure;
+  }
+
   @Override
   public SpinnakerService<T> getService() {
     return this;
