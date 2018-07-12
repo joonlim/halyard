@@ -73,7 +73,7 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
   }
 
   public String getCanonicalName() {
-    return getType().getCanonicalName();
+    return getTypeAndRole().getCanonicalName();
   }
 
   public String getSpinnakerStagingPath(String deploymentName) {
@@ -167,9 +167,13 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
       return role.equals(DEFAULT_ROLE) ? type.getServiceName() : type.getServiceName() + "-" + role;
     }
 
+    public String getCanonicalName() {
+      return role.equals(DEFAULT_ROLE) ? type.getCanonicalName() : type.getCanonicalName() + "-" + role;
+    }
+
     @Override
     public String toString() {
-      return role.equals(DEFAULT_ROLE) ? type.getCanonicalName() : type.getCanonicalName() + "-" + role;
+      return getCanonicalName();
     }
   }
 

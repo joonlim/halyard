@@ -25,6 +25,7 @@ import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.KubernetesV2Clo
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ClouddriverService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ServiceSettings;
+import java.nio.file.Paths;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,14 @@ public class KubernetesV2ClouddriverRoService extends ClouddriverService impleme
     List<Profile> profiles = super.getProfiles(deploymentConfiguration, endpoints);
     generateAwsProfile(deploymentConfiguration, endpoints, getRootHomeDirectory()).ifPresent(profiles::add);
     generateAwsProfile(deploymentConfiguration, endpoints, getHomeDirectory()).ifPresent(profiles::add);
+
+    // Add role's profile
+    Profile roleProfile = new Profile("clouddriver-ro.yml", getArtifactService().getArtifactVersion(deploymentConfiguration.getName(), getArtifact()), Paths
+        .get(getConfigOutputPath(), "clouddriver-ro.yml").toString(), "redis.connection: http://test.com");
+    roleProfile.appendContents(roleProfile.getBaseContents());
+    roleProfile.getEnv().put("SPRING_PROFILES_ACTIVE", "ro");
+    profiles.add(roleProfile);
+
     return profiles;
   }
 
