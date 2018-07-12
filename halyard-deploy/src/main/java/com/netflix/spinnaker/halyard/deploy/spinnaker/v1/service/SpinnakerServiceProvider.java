@@ -71,6 +71,7 @@ abstract public class SpinnakerServiceProvider<D extends DeploymentDetails> {
         }).collect(Collectors.toList());
   }
 
+  // TODO: stop using reflection
   public List<SpinnakerService> getServices() {
     return getFieldsOfType(SpinnakerService.class)
         .stream()

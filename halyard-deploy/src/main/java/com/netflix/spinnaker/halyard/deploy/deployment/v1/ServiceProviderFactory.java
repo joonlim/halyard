@@ -28,6 +28,7 @@ import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerServic
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.bake.debian.BakeDebianServiceProvider;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.google.GoogleDistributedServiceProvider;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v1.KubernetesV1DistributedServiceProvider;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2.HaKubectlServiceProvider;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2.KubectlServiceProvider;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.local.debian.LocalDebianServiceProvider;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.local.git.LocalGitServiceProvider;
@@ -44,6 +45,9 @@ public class ServiceProviderFactory {
 
   @Autowired
   KubectlServiceProvider kubectlServiceProvider;
+
+  @Autowired
+  HaKubectlServiceProvider haKubectlServiceProvider;
 
   @Autowired
   GoogleDistributedServiceProvider googleDistributedServiceProvider;
@@ -69,6 +73,8 @@ public class ServiceProviderFactory {
         return localGitServiceProvider;
       case Distributed:
         return createDeployableServiceProvider(deploymentConfiguration);
+      case DistributedHa:
+        return createHaDeployableServiceProvider(deploymentConfiguration);
       default:
         throw new IllegalArgumentException("Unrecognized deployment type " + type);
     }
@@ -101,5 +107,17 @@ public class ServiceProviderFactory {
       default:
         throw new IllegalArgumentException("No Clustered Simple Deployment for " + providerType.getName());
     }
+  }
+
+  private SpinnakerServiceProvider createHaDeployableServiceProvider(DeploymentConfiguration deploymentConfiguration) {
+    DeploymentEnvironment deploymentEnvironment = deploymentConfiguration.getDeploymentEnvironment();
+    String accountName = deploymentEnvironment.getAccountName();
+
+    if (accountName == null || accountName.isEmpty()) {
+      throw new HalException(new ConfigProblemBuilder(Problem.Severity.FATAL, "An account name must be "
+          + "specified as the desired place to run your simple clustered deployment.").build());
+    }
+
+    return haKubectlServiceProvider;
   }
 }

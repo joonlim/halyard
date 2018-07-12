@@ -39,9 +39,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class KubectlServiceProvider extends SpinnakerServiceProvider<AccountDeploymentDetails<KubernetesAccount>> {
-
-  CustomRoleKubernetesV2Service testService;
-
   @Autowired
   KubernetesV2ClouddriverService clouddriverService;
 
@@ -80,20 +77,6 @@ public class KubectlServiceProvider extends SpinnakerServiceProvider<AccountDepl
 
   @Autowired
   KubernetesV2RoscoService roscoService;
-
-  @Autowired
-  KubernetesV2RedisClouddriverRoService redisClouddriverRoService;
-
-
-  @Autowired
-  CustomRoleKubernetesV2ServiceFactory runtimeServiceFactory;
-
-  @PostConstruct
-  public void postConstruct() throws Exception {
-    // RoleKubernetesV2Service
-    String contents = "redis.connection: redis://spin-redis-clouddriver-ro.spinnaker:6379";
-    testService = runtimeServiceFactory.newInstance(clouddriverService, "caching", SpringService.getSpringServiceConfigOutputPath(), contents);
-  }
 
   @Override
   public RemoteAction clean(AccountDeploymentDetails<KubernetesAccount> details, SpinnakerRuntimeSettings runtimeSettings) {

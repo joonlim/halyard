@@ -49,7 +49,7 @@ public class SpinnakerRuntimeSettings {
 
   public ServiceSettings getServiceSettings(SpinnakerService.TypeAndRole serviceTypeAndRole) {
     if (!services.containsKey(serviceTypeAndRole)) {
-      throw new HalException(Problem.Severity.FATAL, "Service with type and role does not exist"); // TODO
+      throw new HalException(Problem.Severity.FATAL, "Service with type and role does not exist: type=" + serviceTypeAndRole.getType() + ", role=" + serviceTypeAndRole.getRole()); // TODO
     }
     return services.get(serviceTypeAndRole);
   }

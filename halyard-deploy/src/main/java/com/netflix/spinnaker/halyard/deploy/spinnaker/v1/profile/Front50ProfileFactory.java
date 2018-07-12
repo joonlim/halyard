@@ -68,8 +68,9 @@ public class Front50ProfileFactory extends SpringProfileFactory {
         if (persistentStore instanceof RedisPersistentStore) {
           try {
             // TODO: change to front50 redis
-            connectionUri = new URI(endpoints.getServiceSettings(SpinnakerService.TypeAndRole.ofDefaultRole(
-                SpinnakerService.Type.REDIS)).getBaseUrl());
+            // fix me
+            connectionUri = new URI(endpoints.getServiceSettings(SpinnakerService.TypeAndRole.of(
+                SpinnakerService.Type.REDIS, "front50")).getBaseUrl());
           } catch (URISyntaxException e) {
             throw new RuntimeException("Malformed redis URL, this is a bug.");
           }

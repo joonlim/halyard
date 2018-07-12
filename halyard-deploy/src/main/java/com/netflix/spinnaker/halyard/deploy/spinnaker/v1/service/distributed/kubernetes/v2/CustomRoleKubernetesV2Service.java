@@ -13,8 +13,8 @@ import org.yaml.snakeyaml.Yaml;
 public class CustomRoleKubernetesV2Service<T> extends CustomRoleSpinnakerService<T> implements KubernetesV2Service<T> {
   KubernetesV2Service<T> baseKubernetesv2Service;
 
-  public CustomRoleKubernetesV2Service(ObjectMapper objectMapper, ArtifactService artifactService, Yaml yamlParser, HalconfigDirectoryStructure halconfigDirectoryStructure, SpinnakerService<T> baseService, String role, String roleProfileOutputDirectoryPath, String roleProfileContents) {
-    super(objectMapper, artifactService, yamlParser, halconfigDirectoryStructure, baseService, role, roleProfileOutputDirectoryPath, roleProfileContents);
+  public CustomRoleKubernetesV2Service(ObjectMapper objectMapper, ArtifactService artifactService, Yaml yamlParser, HalconfigDirectoryStructure halconfigDirectoryStructure, SpinnakerService<T> baseService, String role, String customProfileName, String customProfileOutputDirectoryPath, String customProfileContents) {
+    super(objectMapper, artifactService, yamlParser, halconfigDirectoryStructure, baseService, role, customProfileName, customProfileOutputDirectoryPath, customProfileContents);
 
     if (!KubernetesV2Service.class.isInstance(baseService)) {
       throw new RuntimeException();
@@ -24,7 +24,7 @@ public class CustomRoleKubernetesV2Service<T> extends CustomRoleSpinnakerService
   }
 
   public CustomRoleKubernetesV2Service(ObjectMapper objectMapper, ArtifactService artifactService, Yaml yamlParser, HalconfigDirectoryStructure halconfigDirectoryStructure, SpinnakerService<T> baseService, String role) {
-    this(objectMapper, artifactService, yamlParser, halconfigDirectoryStructure, baseService, role, null, null);
+    this(objectMapper, artifactService, yamlParser, halconfigDirectoryStructure, baseService, role, null, null, null);
   }
 
   @Override
@@ -40,5 +40,10 @@ public class CustomRoleKubernetesV2Service<T> extends CustomRoleSpinnakerService
   @Override
   public SpinnakerMonitoringDaemonService getMonitoringDaemonService() {
     return baseKubernetesv2Service.getMonitoringDaemonService();
+  }
+
+  @Override
+  public String getArtifactId(String deploymentName) {
+    return baseKubernetesv2Service.getArtifactId(deploymentName);
   }
 }

@@ -18,19 +18,21 @@ public abstract class CustomRoleSpinnakerService<T> extends SpinnakerService<T> 
   SpinnakerService<T> baseService;
 
   String role;
-  String roleProfileOutputDirectoryPath;
-  String roleProfileContents;
+  String customProfileName;
+  String customProfileOutputDirectoryPath;
+  String customProfileContents;
 
-  public CustomRoleSpinnakerService(ObjectMapper objectMapper, ArtifactService artifactService, Yaml yamlParser, HalconfigDirectoryStructure halconfigDirectoryStructure, SpinnakerService<T> baseService, String role, String roleProfileOutputDirectoryPath, String roleProfileContents) {
+  public CustomRoleSpinnakerService(ObjectMapper objectMapper, ArtifactService artifactService, Yaml yamlParser, HalconfigDirectoryStructure halconfigDirectoryStructure, SpinnakerService<T> baseService, String role, String customProfileName, String customProfileOutputDirectoryPath, String customProfileContents) {
     super(objectMapper, artifactService, yamlParser, halconfigDirectoryStructure);
     this.baseService = baseService;
     this.role = role;
-    this.roleProfileOutputDirectoryPath = roleProfileOutputDirectoryPath;
-    this.roleProfileContents = roleProfileContents;
+    this.customProfileName = customProfileName;
+    this.customProfileOutputDirectoryPath = customProfileOutputDirectoryPath;
+    this.customProfileContents = customProfileContents;
   }
 
   public CustomRoleSpinnakerService(ObjectMapper objectMapper, ArtifactService artifactService, Yaml yamlParser, HalconfigDirectoryStructure halconfigDirectoryStructure, SpinnakerService<T> baseService, String role) {
-    this(objectMapper, artifactService, yamlParser, halconfigDirectoryStructure, baseService, role, null, null);
+    this(objectMapper, artifactService, yamlParser, halconfigDirectoryStructure, baseService, role, null, null, null);
   }
 
   @Override
@@ -39,15 +41,15 @@ public abstract class CustomRoleSpinnakerService<T> extends SpinnakerService<T> 
     List<Profile> profiles = baseService.getProfiles(deploymentConfiguration, endpoints);
 
     // Add role's profile
-    if (roleProfileOutputDirectoryPath != null && roleProfileContents != null) {
-      Profile roleProfile = new Profile(getRoleProfileName(),
+    if (customProfileName != null && customProfileOutputDirectoryPath != null && customProfileContents != null) {
+      Profile customProfile = new Profile(getCustomProfileName(),
           getArtifactService().getArtifactVersion(deploymentConfiguration.getName(), getArtifact()),
-          Paths.get(roleProfileOutputDirectoryPath, getRoleProfileName()).toString(),
-          roleProfileContents);
-      roleProfile.appendContents(roleProfile.getBaseContents());
-      roleProfile.getEnv().put("SPRING_PROFILES_ACTIVE", role);
+          Paths.get(customProfileOutputDirectoryPath, getCustomProfileName()).toString(),
+          customProfileContents);
+      customProfile.appendContents(customProfile.getBaseContents());
+      customProfile.getEnv().put("SPRING_PROFILES_ACTIVE", customProfileName);
 
-      profiles.add(roleProfile);
+      profiles.add(customProfile);
     }
 
     return profiles;
@@ -68,8 +70,11 @@ public abstract class CustomRoleSpinnakerService<T> extends SpinnakerService<T> 
     return baseService.getEndpointClass();
   }
 
-  private String getRoleProfileName() {
-    return this.getCanonicalName() + ".yml";
+  private String getCustomProfileName() {
+    if (customProfileName == null) {
+      throw new RuntimeException();
+    }
+    return this.getType().getCanonicalName() + "-" + customProfileName + ".yml";
   }
 
   @Override
@@ -81,6 +86,7 @@ public abstract class CustomRoleSpinnakerService<T> extends SpinnakerService<T> 
   public SpinnakerArtifact getArtifact() {
     return baseService.getArtifact();
   }
+
 
   // Should delegate
 

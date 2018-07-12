@@ -291,20 +291,34 @@ public class DeployService {
         return localGitDeployer;
       case LocalDebian:
         return localDeployer;
-      case Distributed:
+      case Distributed: {
         if (StringUtils.isEmpty(accountName)) {
           throw new HalException(Problem.Severity.FATAL, "An account name must be "
               + "specified as the desired place to run your distributed deployment.");
         }
 
-        Account account = accountService.getAnyProviderAccount(deploymentConfiguration.getName(), accountName);
+        Account account = accountService
+            .getAnyProviderAccount(deploymentConfiguration.getName(), accountName);
         Provider.ProviderType providerType = ((Provider) account.getParent()).providerType();
 
-        if (providerType == Provider.ProviderType.KUBERNETES && account.getProviderVersion() == V2) {
+        if (providerType == Provider.ProviderType.KUBERNETES
+            && account.getProviderVersion() == V2) {
           return kubectlDeployer;
         } else {
           return distributedDeployer;
         }
+      }
+      case DistributedHa: {
+        if (StringUtils.isEmpty(accountName)) {
+          throw new HalException(Problem.Severity.FATAL, "An account name must be "
+              + "specified as the desired place to run your distributed deployment.");
+        }
+
+        Account account = accountService
+            .getAnyProviderAccount(deploymentConfiguration.getName(), accountName);
+        Provider.ProviderType providerType = ((Provider) account.getParent()).providerType();
+        return kubectlDeployer;
+      }
       default:
         throw new IllegalArgumentException("Unrecognized deployment type " + type);
     }
@@ -323,6 +337,7 @@ public class DeployService {
             .setDeploymentName(deploymentName)
             .setBillOfMaterials(billOfMaterials);
       case Distributed:
+      case DistributedHa:
         DeploymentEnvironment deploymentEnvironment = deploymentConfiguration.getDeploymentEnvironment();
         String accountName = deploymentEnvironment.getAccountName();
 

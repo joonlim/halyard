@@ -53,7 +53,8 @@ public class DeploymentEnvironment extends Node {
     LocalGit("Deploy Spinnaker locally (on the machine running the daemon) "
         + "using `git` to fetch all the service's code to be built & run."),
     BakeDebian("Deploy Spinnaker locally but only with the necessary config "
-        + "to be baked into a VM image later.");
+        + "to be baked into a VM image later."),
+    DistributedHa("");
 
     @Getter
     final String description;
