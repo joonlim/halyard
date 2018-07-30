@@ -42,6 +42,10 @@ public class HalconfigDirectoryStructure {
     return ensureRelativeHalDirectory(deploymentName, "profiles");
   }
 
+  public Path getCustomServicesPath(String deploymentName) {
+    return ensureRelativeHalDirectory(deploymentName, "custom-services");
+  }
+
   public Path getServiceLogsPath(String deploymentName, String hostname, String serviceName) {
     Path halconfigPath = Paths.get(getLogsPath(deploymentName).toString(), hostname, serviceName);
     ensureDirectory(halconfigPath);

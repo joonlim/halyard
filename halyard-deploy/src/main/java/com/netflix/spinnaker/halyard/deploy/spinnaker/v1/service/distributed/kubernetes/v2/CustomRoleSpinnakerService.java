@@ -25,7 +25,7 @@ public abstract class CustomRoleSpinnakerService<T> extends SpinnakerService<T> 
   public CustomRoleSpinnakerService(ObjectMapper objectMapper, ArtifactService artifactService, Yaml yamlParser, HalconfigDirectoryStructure halconfigDirectoryStructure, SpinnakerService<T> baseService, String role, String customProfileName, String customProfileOutputDirectoryPath, String customProfileContents) {
     super(objectMapper, artifactService, yamlParser, halconfigDirectoryStructure);
     this.baseService = baseService;
-    this.role = role;
+    this.role = role == null ? DEFAULT_ROLE : role;
     this.customProfileName = customProfileName;
     this.customProfileOutputDirectoryPath = customProfileOutputDirectoryPath;
     this.customProfileContents = customProfileContents;

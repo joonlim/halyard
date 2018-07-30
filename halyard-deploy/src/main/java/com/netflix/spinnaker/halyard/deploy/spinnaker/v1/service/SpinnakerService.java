@@ -189,7 +189,7 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
   public enum Type {
     CLOUDDRIVER("spin-clouddriver", "clouddriver"),
     CLOUDDRIVER_BOOTSTRAP("spin-clouddriver-bootstrap", "clouddriver-bootstrap"),
-    CONSUL_CLIENT("spin-consul-client", "consul-client"),
+    CONSUL_CLIENT("spin-consul-client", "consul-client", true),
     CONSUL_SERVER("spin-consul-server", "consul-server"),
     DECK("spin-deck", "deck"),
     ECHO("spin-echo", "echo"),
@@ -203,18 +203,27 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
     REDIS("spin-redis", "redis"),
     REDIS_BOOTSTRAP("spin-redis-bootstrap", "redis-bootstrap"),
     ROSCO("spin-rosco", "rosco"),
-    MONITORING_DAEMON("spin-monitoring-daemon", "monitoring-daemon"),
-    VAULT_CLIENT("spin-vault-client", "vault-client"),
+    MONITORING_DAEMON("spin-monitoring-daemon", "monitoring-daemon", true),
+    VAULT_CLIENT("spin-vault-client", "vault-client", true),
     VAULT_SERVER("spin-vault-server", "vault-server");
 
     @Getter
     final String serviceName;
     @Getter
     final String canonicalName;
+    @Getter
+    final boolean sidecar;
 
     Type(String serviceName, String canonicalName) {
       this.serviceName = serviceName;
       this.canonicalName = canonicalName;
+      this.sidecar = false;
+    }
+
+    Type(String serviceName, String canonicalName, boolean sidecar) {
+      this.serviceName = serviceName;
+      this.canonicalName = canonicalName;
+      this.sidecar = sidecar;
     }
 
     @Override

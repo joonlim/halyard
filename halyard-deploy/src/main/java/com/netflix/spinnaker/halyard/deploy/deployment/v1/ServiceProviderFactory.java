@@ -28,6 +28,7 @@ import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerServic
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.bake.debian.BakeDebianServiceProvider;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.google.GoogleDistributedServiceProvider;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v1.KubernetesV1DistributedServiceProvider;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2.CustomKubectlServiceProvider;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2.HaKubectlServiceProvider;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2.KubectlServiceProvider;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.local.debian.LocalDebianServiceProvider;
@@ -48,6 +49,9 @@ public class ServiceProviderFactory {
 
   @Autowired
   HaKubectlServiceProvider haKubectlServiceProvider;
+
+  @Autowired
+  CustomKubectlServiceProvider customKubectlServiceProvider;
 
   @Autowired
   GoogleDistributedServiceProvider googleDistributedServiceProvider;
@@ -118,6 +122,7 @@ public class ServiceProviderFactory {
           + "specified as the desired place to run your simple clustered deployment.").build());
     }
 
-    return haKubectlServiceProvider;
+    // return haKubectlServiceProvider;
+    return customKubectlServiceProvider;
   }
 }
