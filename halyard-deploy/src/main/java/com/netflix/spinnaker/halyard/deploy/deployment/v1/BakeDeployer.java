@@ -41,8 +41,8 @@ public class BakeDeployer implements Deployer<BakeServiceProvider, DeploymentDet
       BakeServiceProvider serviceProvider,
       DeploymentDetails deploymentDetails,
       GenerateService.ResolvedConfiguration resolvedConfiguration,
-      List<SpinnakerService.Type> serviceTypes) {
-    List<BakeService> enabledServices = serviceProvider.getPrioritizedBakeableServices(serviceTypes)
+      List<SpinnakerService.TypeAndMode> serviceTypesAndModes) {
+    List<BakeService> enabledServices = serviceProvider.getPrioritizedBakeableServices(serviceTypesAndModes)
         .stream()
         .filter(i -> {
           ServiceSettings serviceSettings = resolvedConfiguration.getServiceSettings(i.getService());
@@ -78,7 +78,7 @@ public class BakeDeployer implements Deployer<BakeServiceProvider, DeploymentDet
       BakeServiceProvider serviceProvider,
       DeploymentDetails deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes) {
+      List<SpinnakerService.TypeAndMode> serviceTypesAndModes) {
     throw new HalException(Problem.Severity.FATAL, "This type of deployment cannot be rolled back.");
   }
 

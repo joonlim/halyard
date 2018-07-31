@@ -113,4 +113,5 @@ public class KubectlServiceProvider extends SpinnakerServiceProvider<AccountDepl
     } finally {
       serviceField.setAccessible(false);
     }
-  }}
+  }
+}

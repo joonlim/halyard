@@ -29,8 +29,10 @@ import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.CustomProfileFa
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.ProfileFactory;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
@@ -47,6 +49,8 @@ import java.util.Optional;
 @Component
 @Slf4j
 abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
+  public final static String DEFAULT_SERVICE_MODE = null;
+
   @Autowired
   ObjectMapper objectMapper;
 
@@ -59,6 +63,16 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
   @Autowired
   HalconfigDirectoryStructure halconfigDirectoryStructure;
 
+  public SpinnakerService() {}
+
+  // Constructor for subclasses that meant to be constructed at runtime (not autowired)
+  public SpinnakerService(ObjectMapper objectMapper, ArtifactService artifactService, Yaml yamlParser, HalconfigDirectoryStructure halconfigDirectoryStructure) {
+    this.objectMapper = objectMapper;
+    this.artifactService = artifactService;
+    this.yamlParser = yamlParser;
+    this.halconfigDirectoryStructure = halconfigDirectoryStructure;
+  }
+
   @Override
   public SpinnakerService<T> getService() {
     return this;
@@ -66,11 +80,11 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
 
   @Override
   public String getServiceName() {
-    return getType().getServiceName();
+    return getTypeAndMode().getServiceName();
   }
 
   public String getCanonicalName() {
-    return getType().getCanonicalName();
+    return getTypeAndMode().getCanonicalName();
   }
 
   public String getSpinnakerStagingPath(String deploymentName) {
@@ -101,6 +115,14 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
   public boolean isInBillOfMaterials(DeploymentConfiguration deployment) {
     String version = getArtifactService().getArtifactVersion(deployment.getName(), getArtifact());
     return (version != null);
+  }
+
+  public String getMode() {
+    return DEFAULT_SERVICE_MODE;
+  }
+
+  public TypeAndMode getTypeAndMode() {
+    return TypeAndMode.of(getType(), getMode());
   }
 
   abstract public Type getType();
@@ -151,7 +173,9 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
     ROSCO("spin-rosco", "rosco"),
     MONITORING_DAEMON("spin-monitoring-daemon", "monitoring-daemon"),
     VAULT_CLIENT("spin-vault-client", "vault-client"),
-    VAULT_SERVER("spin-vault-server", "vault-server");
+    VAULT_SERVER("spin-vault-server", "vault-server"),
+
+    REDIS_GATE("spin-redis-gate", "redis-gate");
 
     @Getter
     final String serviceName;
@@ -181,4 +205,39 @@ abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
           .orElseThrow(() -> new IllegalArgumentException("No service with canonical name " + canonicalName + " exists."));
     }
   }
+
+  @EqualsAndHashCode
+  public static class TypeAndMode {
+    @Getter
+    final Type type;
+    @Getter
+    final String mode;
+
+    public TypeAndMode(Type type, String mode) {
+      this.type = type;
+      this.mode = mode;
+    }
+
+    public static TypeAndMode of(Type type, String mode) {
+      return new TypeAndMode(type, mode);
+    }
+
+    public static TypeAndMode ofDefaultMode(Type type) {
+      return new TypeAndMode(type, DEFAULT_SERVICE_MODE);
+    }
+
+    public String getServiceName() {
+      return mode.equals(DEFAULT_SERVICE_MODE) ? type.getServiceName() : type.getServiceName() + StringUtils.capitalize(mode);
+    }
+
+    public String getCanonicalName() {
+      return mode.equals(DEFAULT_SERVICE_MODE) ? type.getCanonicalName() : type.getCanonicalName() + StringUtils.capitalize(mode);
+    }
+
+    @Override
+    public String toString() {
+      return getCanonicalName();
+    }
+  }
+
 }

@@ -30,25 +30,25 @@ public interface Deployer<S extends SpinnakerServiceProvider<D>, D extends Deplo
       S serviceProvider,
       D deploymentDetails,
       ResolvedConfiguration resolvedConfiguration,
-      List<SpinnakerService.Type> serviceTypes);
+      List<SpinnakerService.TypeAndMode> serviceTypesAndModes);
 
   void rollback(
       S serviceProvider,
       D deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes);
+      List<SpinnakerService.TypeAndMode> serviceTypesAndModes);
 
   void collectLogs(
       S serviceProvider,
       D deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes);
+      List<SpinnakerService.Type> serviceTypesAndModes);
 
   RemoteAction connectCommand(
       S serviceProvider,
       D deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes);
+      List<SpinnakerService.Type> serviceTypesAndModes);
 
   default RemoteAction clean(
       S serviceProvider,
@@ -68,7 +68,7 @@ public interface Deployer<S extends SpinnakerServiceProvider<D>, D extends Deplo
       S serviceProvider,
       D deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes
+      List<SpinnakerService.TypeAndMode> serviceTypesAndModes
   ) {
     RemoteAction result = new RemoteAction();
     result.setAutoRun(true);

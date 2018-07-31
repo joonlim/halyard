@@ -40,8 +40,8 @@ public class KubectlDeployer implements Deployer<KubectlServiceProvider,AccountD
   public RemoteAction deploy(KubectlServiceProvider serviceProvider,
       AccountDeploymentDetails<KubernetesAccount> deploymentDetails,
       GenerateService.ResolvedConfiguration resolvedConfiguration,
-      List<SpinnakerService.Type> serviceTypes) {
-    List<KubernetesV2Service> services = serviceProvider.getServicesByPriority(serviceTypes);
+      List<SpinnakerService.TypeAndMode> serviceTypesAndModes) {
+    List<KubernetesV2Service> services = serviceProvider.getServicesByPriority(serviceTypesAndModes);
     services.stream().forEach((service) -> {
       if (service instanceof SidecarService) {
         return;

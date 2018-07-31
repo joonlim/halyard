@@ -68,10 +68,10 @@ public class DistributedDeployer<T extends Account> implements
   public void rollback(DistributedServiceProvider<T> serviceProvider,
       AccountDeploymentDetails<T> deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes) {
+      List<SpinnakerService.TypeAndMode> serviceTypesAndModes) {
     DaemonTaskHandler.newStage("Checking if it is safe to roll back all services");
     for (DistributedService distributedService : serviceProvider
-        .getPrioritizedDistributedServices(serviceTypes)) {
+        .getPrioritizedDistributedServices(serviceTypesAndModes)) {
       SpinnakerService service = distributedService.getService();
       ServiceSettings settings = runtimeSettings.getServiceSettings(service);
       boolean safeToUpdate = settings.getSafeToUpdate();
@@ -91,7 +91,7 @@ public class DistributedDeployer<T extends Account> implements
 
     DaemonTaskHandler.newStage("Rolling back all updatable services");
     for (DistributedService distributedService : serviceProvider
-        .getPrioritizedDistributedServices(serviceTypes)) {
+        .getPrioritizedDistributedServices(serviceTypesAndModes)) {
       SpinnakerService service = distributedService.getService();
       ServiceSettings settings = runtimeSettings.getServiceSettings(service);
       if (!settings.getEnabled() || settings.getSkipLifeCycleManagement()) {
@@ -129,9 +129,9 @@ public class DistributedDeployer<T extends Account> implements
   @Override
   public void collectLogs(DistributedServiceProvider<T> serviceProvider,
       AccountDeploymentDetails<T> deploymentDetails, SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes) {
+      List<SpinnakerService.TypeAndMode> serviceTypesAndModes) {
     for (DistributedService distributedService : serviceProvider
-        .getPrioritizedDistributedServices(serviceTypes)) {
+        .getPrioritizedDistributedServices(serviceTypesAndModes)) {
       if (distributedService instanceof LogCollector) {
         ((LogCollector) distributedService).collectLogs(deploymentDetails, runtimeSettings);
       } else {
