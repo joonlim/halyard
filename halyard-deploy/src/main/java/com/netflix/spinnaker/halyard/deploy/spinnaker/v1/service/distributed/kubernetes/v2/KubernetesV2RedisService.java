@@ -20,6 +20,8 @@ package com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.ku
 
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.RedisService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ServiceSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.DeployPriority;
+import lombok.Data;
 import lombok.experimental.Delegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,6 +29,8 @@ import redis.clients.jedis.Jedis;
 
 @Component
 public class KubernetesV2RedisService extends RedisService implements KubernetesV2Service<Jedis> {
+  final DeployPriority deployPriority = new DeployPriority(1);
+
   @Delegate
   @Autowired
   KubernetesV2ServiceDelegate serviceDelegate;
@@ -39,4 +43,7 @@ public class KubernetesV2RedisService extends RedisService implements Kubernetes
   public ServiceSettings defaultServiceSettings() {
     return new Settings();
   }
+
+  @Override
+  public DeployPriority getDeployPriority() { return this.deployPriority; }
 }
