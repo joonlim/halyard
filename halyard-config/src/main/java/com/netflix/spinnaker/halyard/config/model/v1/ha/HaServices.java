@@ -18,14 +18,18 @@
 
 package com.netflix.spinnaker.halyard.config.model.v1.ha;
 
+import com.netflix.spinnaker.halyard.config.model.v1.ha.HaService.HaServiceType;
 import com.netflix.spinnaker.halyard.config.model.v1.node.Node;
 import com.netflix.spinnaker.halyard.config.model.v1.node.NodeIterator;
 import com.netflix.spinnaker.halyard.config.model.v1.node.NodeIteratorFactory;
 import com.netflix.spinnaker.halyard.config.model.v1.node.Validator;
 import com.netflix.spinnaker.halyard.config.problem.v1.ConfigProblemSetBuilder;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -70,4 +74,23 @@ public class HaServices extends Node implements Cloneable {
     }
   }
 
+  public List<HaServiceType> getEnabledHaServiceTypes() {
+    return getFieldsOfType(HaService.class).stream()
+        .filter(HaService::isEnabled)
+        .map(HaService::haServiceType)
+        .collect(Collectors.toList());
+  }
+
+  private <T> List<T> getFieldsOfType(Class<T> clazz) {
+    return Arrays.stream(this.getClass().getDeclaredFields())
+        .filter(f -> clazz.isAssignableFrom(f.getType()))
+        .map(f -> {
+          f.setAccessible(true);
+          try {
+            return (T) f.get(this);
+          } catch (IllegalAccessException e) {
+            throw new RuntimeException("Unable to read high availability service " + f.getName());
+          }
+        }).collect(Collectors.toList());
+  }
 }

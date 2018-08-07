@@ -19,9 +19,11 @@
 package com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2;
 
 import com.netflix.spinnaker.halyard.config.model.v1.node.DeploymentConfiguration;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ClouddriverService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.GateService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ServiceSettings;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.KubernetesSharedServiceSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2.ha.KubernetesV2SpringServiceWrapper;
 import lombok.experimental.Delegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,5 +47,16 @@ public class KubernetesV2GateService extends GateService implements KubernetesV2
         .setLocation(kubernetesSharedServiceSettings.getDeployLocation())
         .setEnabled(true);
     return settings;
+  }
+
+  @Override
+  public KubernetesV2Service<GateService.Gate> withAdditionalProfile(String additionalProfileName, String additionalProfileContents) {
+    return new KubernetesV2SpringServiceWrapper<>(getObjectMapper(),
+        getArtifactService(),
+        getYamlParser(),
+        getHalconfigDirectoryStructure(),
+        this,
+        additionalProfileName,
+        additionalProfileContents);
   }
 }

@@ -142,4 +142,8 @@ public class ServiceSettings {
       throw new HalException(Problem.Severity.FATAL, "Could not build metrics endpoint. This is probably a bug.", e);
     }
   }
+
+  public ServiceSettings addProfile(String profile) {
+    return this;
+  }
 }

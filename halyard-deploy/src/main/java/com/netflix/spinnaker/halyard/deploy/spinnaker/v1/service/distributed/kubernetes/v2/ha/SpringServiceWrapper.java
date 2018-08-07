@@ -1,0 +1,138 @@
+/*
+ * Copyright 2018 Google, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License")
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *
+ */
+
+package com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2.ha;
+
+import static com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpringService.SPRING_CONFIG_OUTPUT_PATH;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.spinnaker.halyard.config.config.v1.HalconfigDirectoryStructure;
+import com.netflix.spinnaker.halyard.config.model.v1.node.DeploymentConfiguration;
+import com.netflix.spinnaker.halyard.core.error.v1.HalException;
+import com.netflix.spinnaker.halyard.core.problem.v1.Problem;
+import com.netflix.spinnaker.halyard.deploy.services.v1.ArtifactService;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerArtifact;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.ProfileFactory;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.StringBackedProfileFactory;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ServiceSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerService;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpringService;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
+import org.yaml.snakeyaml.Yaml;
+
+/**
+ * A SpinnakerServiceWrapper is used to add an additional profile to an existing SpinnakerService instance.
+ */
+public class SpringServiceWrapper<T> extends SpinnakerService<T> {
+  SpringService<T> baseService;
+
+  String additionalProfileName;
+  String additionalProfileContents;
+
+  public SpringServiceWrapper(ObjectMapper objectMapper, ArtifactService artifactService, Yaml yamlParser, HalconfigDirectoryStructure halconfigDirectoryStructure, SpringService baseService, String additionalProfileName, String additionalProfileContents) {
+    super(objectMapper, artifactService, yamlParser, halconfigDirectoryStructure);
+    this.baseService = baseService;
+    this.additionalProfileName = additionalProfileName;
+    this.additionalProfileContents = additionalProfileContents;
+  }
+
+  @Override
+  public ServiceSettings buildServiceSettings(DeploymentConfiguration deploymentConfiguration) {
+    return baseService.buildServiceSettings(deploymentConfiguration)
+        .addProfile("test")
+        .addProfile("local") // TODO(joonlim): Do I have to add "test" and "local" manually?
+        .addProfile(additionalProfileName);
+  }
+
+  @Override
+  public List<Profile> getProfiles(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+    List<Profile> profiles = baseService.getProfiles(deploymentConfiguration, endpoints);
+
+    ArtifactService artifactService = getArtifactService();
+    SpinnakerArtifact artifact = getArtifact();
+    ProfileFactory profileFactory = new StringBackedProfileFactory() {
+      @Override
+      protected void setProfile(Profile profile, DeploymentConfiguration deploymentConfiguration,
+          SpinnakerRuntimeSettings endpoints) {
+        profile.appendContents(profile.getBaseContents());
+      }
+
+      @Override
+      protected ArtifactService getArtifactService() {
+        return artifactService;
+      }
+
+      @Override
+      public SpinnakerArtifact getArtifact() {
+        return artifact;
+      }
+
+      @Override
+      protected String commentPrefix() {
+        return "## ";
+      }
+
+      @Override
+      protected String getRawBaseProfile() {
+        return additionalProfileContents;
+      }
+    };
+
+    String profileFileName = profileFileName();
+    Profile additionalProfile = profileFactory.getProfile(profileFileName, Paths
+        .get(SPRING_CONFIG_OUTPUT_PATH, profileFileName).toString(), deploymentConfiguration, endpoints);
+    profiles.add(additionalProfile);
+
+    return profiles;
+  }
+
+  @Override
+  public Type getType() {
+    return baseService.getType();
+  }
+
+  @Override
+  public Class<T> getEndpointClass() {
+    return baseService.getEndpointClass();
+  }
+
+  @Override
+  protected Optional<String> customProfileOutputPath(String profileName) {
+    if (profileName.equals(profileFileName())) {
+      throw new HalException(Problem.Severity.FATAL, "Can't have a custom profile named \"" + profileName + "\" because a profile with that name will be auto-generated by halyard");
+    }
+    if (profileName.equals(getCanonicalName() + ".yml") || profileName.startsWith(getCanonicalName() + "-") || profileName.startsWith("spinnaker")) {
+      return Optional.of(Paths.get(SPRING_CONFIG_OUTPUT_PATH, profileName).toString());
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  public SpinnakerArtifact getArtifact() {
+    return baseService.getArtifact();
+  }
+
+  private String profileFileName() {
+    return getCanonicalName() + "-" + additionalProfileName + ".yml";
+  }
+}

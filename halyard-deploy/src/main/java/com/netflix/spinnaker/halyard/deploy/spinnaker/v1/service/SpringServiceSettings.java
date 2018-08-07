@@ -28,14 +28,15 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(callSuper = true)
 @Data
 abstract public class SpringServiceSettings extends ServiceSettings {
+  private static final String SPRING_PROFILES_ACTIVE_KEY = "SPRING_PROFILES_ACTIVE";
+
   protected void setProfiles(List<String> profiles) {
     if (profiles == null || profiles.isEmpty()) {
       return;
     }
 
-    String key = "SPRING_PROFILES_ACTIVE";
     String val = profiles.stream().collect(Collectors.joining(","));
-    getEnv().put(key, val);
+    getEnv().put(SPRING_PROFILES_ACTIVE_KEY, val);
   }
 
   SpringServiceSettings() {}
@@ -44,5 +45,14 @@ abstract public class SpringServiceSettings extends ServiceSettings {
     setBasicAuthEnabled(true);
     setUsername(RandomStringUtils.random(10));
     setPassword(RandomStringUtils.random(10));
+  }
+
+  @Override
+  public ServiceSettings addProfile(String profile) {
+    getEnv().put(SPRING_PROFILES_ACTIVE_KEY, getEnv().containsKey(SPRING_PROFILES_ACTIVE_KEY) ?
+        getEnv().get(SPRING_PROFILES_ACTIVE_KEY) + "," + profile :
+        profile
+    );
+    return this;
   }
 }

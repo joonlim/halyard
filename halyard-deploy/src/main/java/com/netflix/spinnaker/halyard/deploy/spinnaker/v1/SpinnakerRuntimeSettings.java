@@ -54,6 +54,7 @@ public class SpinnakerRuntimeSettings {
     ServiceSettings rosco;
     ServiceSettings redis;
     ServiceSettings redisBootstrap;
+    ServiceSettings redisForGate;
     ServiceSettings monitoringDaemon;
     ServiceSettings vaultClient;
     ServiceSettings vaultServer;

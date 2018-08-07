@@ -70,6 +70,8 @@ public interface KubernetesV2Service<T> extends HasServiceSettings<T> {
 
   default DeployPriority getDeployPriority() { return DeployPriority.ZERO_DEPLOY_PRIORITY; }
 
+  default boolean isStatefulSet() { return false; }
+
   default boolean isEnabled(DeploymentConfiguration deploymentConfiguration) {
     return true;
   }
@@ -154,7 +156,8 @@ public interface KubernetesV2Service<T> extends HasServiceSettings<T> {
         .addBinding("containers", containers)
         .addBinding("volumes", volumes);
 
-    return new JinjaJarResource("/kubernetes/manifests/deployment.yml")
+    String manifestTemplate = isStatefulSet() ? "/kubernetes/manifests/statefulSet.yml" : "/kubernetes/manifests/deployment.yml";
+    return new JinjaJarResource(manifestTemplate)
         .addBinding("name", getService().getCanonicalName())
         .addBinding("namespace", namespace)
         .addBinding("replicas", targetSize)
@@ -341,5 +344,9 @@ public interface KubernetesV2Service<T> extends HasServiceSettings<T> {
         namespace,
         "$(" + podNameCommand + ")",
         port));
+  }
+
+  default <T> KubernetesV2Service<T> withAdditionalProfile(String additionalProfileName, String additionalProfileContents) {
+    throw new UnsupportedOperationException("This service does not support additional profiles");
   }
 }
