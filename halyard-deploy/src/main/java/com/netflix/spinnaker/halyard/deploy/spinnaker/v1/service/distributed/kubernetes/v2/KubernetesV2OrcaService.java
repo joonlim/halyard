@@ -20,12 +20,15 @@ package com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.ku
 
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.OrcaService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ServiceSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.DeployPriority;
 import lombok.experimental.Delegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class KubernetesV2OrcaService extends OrcaService implements KubernetesV2Service<OrcaService.Orca> {
+  final DeployPriority deployPriority = new DeployPriority(1);
+
   @Delegate
   @Autowired
   KubernetesV2ServiceDelegate serviceDelegate;
@@ -34,4 +37,7 @@ public class KubernetesV2OrcaService extends OrcaService implements KubernetesV2
   public ServiceSettings defaultServiceSettings() {
     return new Settings();
   }
+
+  @Override
+  public DeployPriority getDeployPriority() { return this.deployPriority; }
 }

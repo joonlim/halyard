@@ -147,9 +147,7 @@ public class DeploymentController extends DeploymentsGrpc.DeploymentsImplBase{
       @RequestParam(required = false) List<String> serviceNames) {
     List<String> finalServiceNames = serviceNames != null ? serviceNames : Collections.emptyList();
     Supplier buildResponse = () -> {
-      GenerateService.ResolvedConfiguration configuration = generateService.generateConfigWithOptionalServices(deploymentName, finalServiceNames.stream()
-          .map(SpinnakerService.Type::fromCanonicalName)
-          .collect(Collectors.toList()));
+      GenerateService.ResolvedConfiguration configuration = generateService.generateConfigWithOptionalServices(deploymentName, finalServiceNames);
       return configuration.getStagingDirectory();
     };
     StaticRequestBuilder<String> builder = new StaticRequestBuilder<>(buildResponse);

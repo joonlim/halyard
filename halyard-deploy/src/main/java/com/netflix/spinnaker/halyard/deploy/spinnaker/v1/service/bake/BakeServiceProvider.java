@@ -53,10 +53,10 @@ abstract public class BakeServiceProvider extends SpinnakerServiceProvider<Deplo
   // TODO(lwander) move from string to something like RemoteAction
   abstract public String getInstallCommand(DeploymentDetails deploymentDetails, GenerateService.ResolvedConfiguration resolvedConfiguration, Map<String, String> installCommands, String startupCommand);
 
-  public List<BakeService> getPrioritizedBakeableServices(List<SpinnakerService.Type> serviceTypes) {
+  public List<BakeService> getPrioritizedBakeableServices(List<String> serviceNames) {
     List<BakeService> result = getFieldsOfType(BakeService.class)
         .stream()
-        .filter(s -> serviceTypes.contains(s.getService().getType()))
+        .filter(s -> serviceNames.contains(s.getService().getCanonicalName()))
         .collect(Collectors.toList());
 
     result.sort((a, b) -> b.getPriority().compareTo(a.getPriority()));

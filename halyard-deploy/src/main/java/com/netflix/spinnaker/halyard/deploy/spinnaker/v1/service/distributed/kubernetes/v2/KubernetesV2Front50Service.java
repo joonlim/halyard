@@ -23,6 +23,7 @@ import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSetting
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.Front50Service;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ServiceSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.DeployPriority;
 import lombok.experimental.Delegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,8 @@ import java.util.List;
 
 @Component
 public class KubernetesV2Front50Service extends Front50Service implements KubernetesV2Service<Front50Service.Front50> {
+  final DeployPriority deployPriority = new DeployPriority(4);
+
   @Delegate
   @Autowired
   KubernetesV2ServiceDelegate serviceDelegate;
@@ -47,4 +50,7 @@ public class KubernetesV2Front50Service extends Front50Service implements Kubern
   public ServiceSettings defaultServiceSettings() {
     return new Settings();
   }
+
+  @Override
+  public DeployPriority getDeployPriority() { return this.deployPriority; }
 }

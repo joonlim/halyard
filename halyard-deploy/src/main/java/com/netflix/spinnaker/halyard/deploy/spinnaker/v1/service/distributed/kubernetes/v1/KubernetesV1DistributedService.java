@@ -242,7 +242,7 @@ public interface KubernetesV1DistributedService<T> extends DistributedService<T,
     Map<String, String> env = new HashMap<>();
     List<ConfigSource> configSources = new ArrayList<>();
 
-    Map<String, Profile> serviceProfiles = resolvedConfiguration.getProfilesForService(thisService.getType());
+    Map<String, Profile> serviceProfiles = resolvedConfiguration.getProfilesForService(thisService);
     Set<String> requiredFiles = new HashSet<>();
 
     for (SidecarService sidecarService : getSidecars(runtimeSettings)) {

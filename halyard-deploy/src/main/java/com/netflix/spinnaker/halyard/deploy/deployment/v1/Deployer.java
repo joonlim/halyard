@@ -30,25 +30,25 @@ public interface Deployer<S extends SpinnakerServiceProvider<D>, D extends Deplo
       S serviceProvider,
       D deploymentDetails,
       ResolvedConfiguration resolvedConfiguration,
-      List<SpinnakerService.Type> serviceTypes);
+      List<String> serviceNames);
 
   void rollback(
       S serviceProvider,
       D deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes);
+      List<String> serviceNames);
 
   void collectLogs(
       S serviceProvider,
       D deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes);
+      List<String> serviceNames);
 
   RemoteAction connectCommand(
       S serviceProvider,
       D deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes);
+      List<String> serviceNames);
 
   default RemoteAction clean(
       S serviceProvider,

@@ -44,8 +44,8 @@ public class LocalDeployer implements Deployer<LocalServiceProvider, DeploymentD
       LocalServiceProvider serviceProvider,
       DeploymentDetails deploymentDetails,
       GenerateService.ResolvedConfiguration resolvedConfiguration,
-      List<SpinnakerService.Type> serviceTypes) {
-    List<LocalService> enabledServices = serviceProvider.getLocalServices(serviceTypes)
+      List<String> serviceNames) {
+    List<LocalService> enabledServices = serviceProvider.getLocalServices(serviceNames)
         .stream()
         .filter(i -> resolvedConfiguration.getServiceSettings(i.getService()) != null)
         .filter(i -> {
@@ -81,14 +81,14 @@ public class LocalDeployer implements Deployer<LocalServiceProvider, DeploymentD
       LocalServiceProvider serviceProvider,
       DeploymentDetails deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes) {
+      List<String> serviceNames) {
     throw new HalException(Problem.Severity.FATAL, "No support for rolling back local deployments yet.");
   }
 
   @Override
   public void collectLogs(LocalServiceProvider serviceProvider, DeploymentDetails deploymentDetails,
-      SpinnakerRuntimeSettings runtimeSettings, List<SpinnakerService.Type> serviceTypes) {
-    for (LocalService localService : serviceProvider.getLocalServices(serviceTypes)) {
+      SpinnakerRuntimeSettings runtimeSettings, List<String> serviceNames) {
+    for (LocalService localService : serviceProvider.getLocalServices(serviceNames)) {
       localService.collectLogs(deploymentDetails, runtimeSettings);
     }
   }
@@ -98,7 +98,7 @@ public class LocalDeployer implements Deployer<LocalServiceProvider, DeploymentD
       LocalServiceProvider serviceProvider,
       DeploymentDetails deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes) {
+      List<String> serviceNames) {
     RemoteAction result = new RemoteAction();
     result.setScript(String.join("\n",
         "#!/usr/bin/env bash",

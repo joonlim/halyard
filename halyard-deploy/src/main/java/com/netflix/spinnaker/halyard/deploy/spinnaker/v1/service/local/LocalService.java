@@ -36,7 +36,7 @@ public interface LocalService<T> extends HasServiceSettings<T>, LogCollector<T, 
   }
 
   default String stageProfilesCommand(DeploymentDetails details, GenerateService.ResolvedConfiguration resolvedConfiguration) {
-    Map<String, Profile> profiles = resolvedConfiguration.getProfilesForService(getService().getType());
+    Map<String, Profile> profiles = resolvedConfiguration.getProfilesForService(getService());
 
     List<String> allCommands = new ArrayList<>();
     for (Map.Entry<String, Profile> entry : profiles.entrySet()) {

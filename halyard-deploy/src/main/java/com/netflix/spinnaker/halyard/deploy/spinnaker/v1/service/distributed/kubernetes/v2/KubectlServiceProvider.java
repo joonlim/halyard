@@ -83,9 +83,9 @@ public class KubectlServiceProvider extends SpinnakerServiceProvider<AccountDepl
     return new RemoteAction();
   }
 
-  public List<KubernetesV2Service> getServicesByPriority(List<SpinnakerService.Type> serviceTypes) {
+  public List<KubernetesV2Service> getServicesByPriority(List<String> serviceNames) {
     List<KubernetesV2Service> result = getFieldsOfType(KubernetesV2Service.class).stream()
-        .filter(d -> serviceTypes.contains(d.getService().getType()))
+        .filter(d -> serviceNames.contains(d.getService().getCanonicalName()))
         .collect(Collectors.toList());
 
     if (result.removeIf(s -> s.getService().getType() == SpinnakerService.Type.REDIS)) {
@@ -95,12 +95,12 @@ public class KubectlServiceProvider extends SpinnakerServiceProvider<AccountDepl
     return result;
   }
 
-  public KubernetesV2Service getService(SpinnakerService.Type type) {
-    return getService(type, Object.class);
+  public KubernetesV2Service getService(String serviceName) {
+    return getService(serviceName, Object.class);
   }
 
-  public <S> KubernetesV2Service getService(SpinnakerService.Type type, Class<S> clazz) {
-    Field serviceField = getField(type.getCanonicalName() + "service");
+  public <S> KubernetesV2Service getService(String serviceName, Class<S> clazz) {
+    Field serviceField = getField(serviceName + "service");
     if (serviceField == null) {
       return null;
     }
@@ -109,7 +109,7 @@ public class KubectlServiceProvider extends SpinnakerServiceProvider<AccountDepl
     try {
       return (KubernetesV2Service) serviceField.get(this);
     } catch (IllegalAccessException e) {
-      throw new HalException(Problem.Severity.FATAL, "Can't access service field for " + type + ": " + e.getMessage());
+      throw new HalException(Problem.Severity.FATAL, "Can't access service field for " + serviceName + ": " + e.getMessage());
     } finally {
       serviceField.setAccessible(false);
     }

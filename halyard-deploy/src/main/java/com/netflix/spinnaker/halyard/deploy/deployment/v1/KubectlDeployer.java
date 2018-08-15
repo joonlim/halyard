@@ -40,8 +40,8 @@ public class KubectlDeployer implements Deployer<KubectlServiceProvider,AccountD
   public RemoteAction deploy(KubectlServiceProvider serviceProvider,
       AccountDeploymentDetails<KubernetesAccount> deploymentDetails,
       GenerateService.ResolvedConfiguration resolvedConfiguration,
-      List<SpinnakerService.Type> serviceTypes) {
-    List<KubernetesV2Service> services = serviceProvider.getServicesByPriority(serviceTypes);
+      List<String> serviceNames) {
+    List<KubernetesV2Service> services = serviceProvider.getServicesByPriority(serviceNames);
     services.stream().forEach((service) -> {
       if (service instanceof SidecarService) {
         return;
@@ -86,7 +86,7 @@ public class KubectlDeployer implements Deployer<KubectlServiceProvider,AccountD
   public void rollback(KubectlServiceProvider serviceProvider,
       AccountDeploymentDetails<KubernetesAccount> deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes) {
+      List<String> serviceNames) {
     throw new UnsupportedOperationException("todo(lwander)");
   }
 
@@ -94,7 +94,7 @@ public class KubectlDeployer implements Deployer<KubectlServiceProvider,AccountD
   public void collectLogs(KubectlServiceProvider serviceProvider,
       AccountDeploymentDetails<KubernetesAccount> deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes) {
+      List<String> serviceNames) {
     throw new UnsupportedOperationException("todo(lwander)");
   }
 
@@ -102,10 +102,10 @@ public class KubectlDeployer implements Deployer<KubectlServiceProvider,AccountD
   public RemoteAction connectCommand(KubectlServiceProvider serviceProvider,
       AccountDeploymentDetails<KubernetesAccount> deploymentDetails,
       SpinnakerRuntimeSettings runtimeSettings,
-      List<SpinnakerService.Type> serviceTypes) {
+      List<String> serviceNames) {
     RemoteAction result = new RemoteAction();
 
-    String connectCommands = String.join(" &\n", serviceTypes.stream()
+    String connectCommands = String.join(" &\n", serviceNames.stream()
         .map(t -> serviceProvider.getService(t)
             .connectCommand(deploymentDetails, runtimeSettings))
         .collect(Collectors.toList()));

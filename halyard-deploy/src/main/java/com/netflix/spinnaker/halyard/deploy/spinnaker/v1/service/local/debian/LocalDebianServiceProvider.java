@@ -82,10 +82,8 @@ public class LocalDebianServiceProvider extends LocalServiceProvider {
   @Override
   public String getInstallCommand(DeploymentDetails deploymentDetails, GenerateService.ResolvedConfiguration resolvedConfiguration, Map<String, String> installCommands) {
     Map<String, Object> bindings = new HashMap<>();
-    List<SpinnakerService.Type> serviceTypes = new ArrayList<>(installCommands.keySet()).stream()
-        .map(SpinnakerService.Type::fromCanonicalName)
-        .collect(Collectors.toList());
-    List<String> upstartNames = getLocalServices(serviceTypes)
+    List<String> serviceNames = new ArrayList<>(installCommands.keySet());
+    List<String> upstartNames = getLocalServices(serviceNames)
         .stream()
         .filter(i -> resolvedConfiguration.getServiceSettings(i.getService()).getEnabled())
         .map(i -> ((LocalDebianService) i).getUpstartServiceName())
@@ -94,8 +92,8 @@ public class LocalDebianServiceProvider extends LocalServiceProvider {
     List<String> systemdServiceConfigs = upstartNames.stream()
         .map(n -> n + ".service")
         .collect(Collectors.toList());
-    List<String> serviceInstalls = serviceTypes.stream()
-        .map(t -> installCommands.get(t.getCanonicalName()))
+    List<String> serviceInstalls = serviceNames.stream()
+        .map(s -> installCommands.get(s))
         .collect(Collectors.toList());
 
     TemplatedResource resource = new StringReplaceJarResource("/debian/init.sh");

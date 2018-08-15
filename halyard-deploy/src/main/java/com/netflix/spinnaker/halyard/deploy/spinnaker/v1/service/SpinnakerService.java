@@ -28,8 +28,10 @@ import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSetting
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.CustomProfileFactory;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.ProfileFactory;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -46,6 +48,8 @@ import java.util.Optional;
 @Data
 @Component
 @Slf4j
+@NoArgsConstructor
+@AllArgsConstructor // Constructor for subclasses that are meant to be constructed at runtime (not autowired)
 abstract public class SpinnakerService<T> implements HasServiceSettings<T> {
   @Autowired
   ObjectMapper objectMapper;

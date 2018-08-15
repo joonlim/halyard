@@ -71,14 +71,13 @@ abstract public class ConsulClientService extends SpinnakerService<ConsulApi> im
   @Override
   public List<Profile> getProfiles(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
     List<Profile> result = new ArrayList<>();
-    for (Map.Entry<Type, ServiceSettings> entry : endpoints.getAllServiceSettings().entrySet()) {
+    for (Map.Entry<String, ServiceSettings> entry : endpoints.getAllServiceSettings().entrySet()) {
       ServiceSettings settings = entry.getValue();
-      Type type = entry.getKey();
       if (!settings.getSidecar() && settings.getEnabled()) {
-        String serviceName = type.getCanonicalName();
+        String serviceName = entry.getKey();
         String profileName = consulClientService(serviceName);
         String profilePath = Paths.get(CLIENT_OUTPUT_PATH, serviceName + ".json").toString();
-        ProfileFactory factory = consulServiceProfileFactoryBuilder.build(type, settings);
+        ProfileFactory factory = consulServiceProfileFactoryBuilder.build(serviceName, settings);
         result.add(factory.getProfile(profileName, profilePath, deploymentConfiguration, endpoints));
       }
     }
@@ -93,7 +92,7 @@ abstract public class ConsulClientService extends SpinnakerService<ConsulApi> im
   @Override
   public List<Profile> getSidecarProfiles(GenerateService.ResolvedConfiguration resolvedConfiguration, SpinnakerService service) {
     List<Profile> result = new ArrayList<>();
-    Map<String, Profile> profiles = resolvedConfiguration.getProfilesForService(getType());
+    Map<String, Profile> profiles = resolvedConfiguration.getProfilesForService(this);
     Profile profile = profiles.get(consulClientService(service.getCanonicalName()));
     result.add(profile);
     profile = profiles.get(clientProfileName);

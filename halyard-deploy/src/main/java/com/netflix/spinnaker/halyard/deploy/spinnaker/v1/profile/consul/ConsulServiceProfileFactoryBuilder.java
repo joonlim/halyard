@@ -45,7 +45,7 @@ public class ConsulServiceProfileFactoryBuilder {
   @Autowired
   protected ObjectMapper objectMapper;
 
-  public ProfileFactory build(SpinnakerService.Type type, ServiceSettings settings) {
+  public ProfileFactory build(String serviceName, ServiceSettings settings) {
     return new ProfileFactory() {
       @Override
       protected ArtifactService getArtifactService() {
@@ -71,7 +71,7 @@ public class ConsulServiceProfileFactoryBuilder {
         }
 
         ConsulService consulService = new ConsulService()
-            .setName(type.getCanonicalName())
+            .setName(serviceName)
             .setPort(settings.getPort())
             .setChecks(Collections.singletonList(check));
 

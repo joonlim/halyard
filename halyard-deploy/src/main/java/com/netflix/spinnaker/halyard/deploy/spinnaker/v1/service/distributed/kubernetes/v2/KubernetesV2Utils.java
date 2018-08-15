@@ -29,10 +29,15 @@ import com.netflix.spinnaker.halyard.core.resource.v1.JinjaJarResource;
 import com.netflix.spinnaker.halyard.core.resource.v1.TemplatedResource;
 import com.netflix.spinnaker.halyard.core.tasks.v1.DaemonTaskHandler;
 import com.netflix.spinnaker.halyard.core.tasks.v1.DaemonTaskInterrupted;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.omg.CORBA.portable.OutputStream;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.ByteArrayInputStream;
@@ -146,6 +151,13 @@ public class KubernetesV2Utils {
     command.add("apply");
     command.add("-f");
     command.add("-"); // read from stdin
+
+    // TODO(joonlim): delete me
+    try {
+      Files.write(Paths.get("/usr/local/google/home/joonlim/dev/spinnaker/halyard/out.log"), ("\n\nCOMMAND:\n" + command + "\n" + manifest + "\n\n").getBytes(), StandardOpenOption.APPEND);
+    } catch (Exception e) {
+
+    }
 
     JobRequest request = new JobRequest().setTokenizedCommand(command);
 

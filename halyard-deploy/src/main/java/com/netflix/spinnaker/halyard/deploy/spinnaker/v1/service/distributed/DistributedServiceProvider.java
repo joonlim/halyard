@@ -29,12 +29,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 abstract public class DistributedServiceProvider<T extends Account> extends SpinnakerServiceProvider<AccountDeploymentDetails<T>> {
-  public DistributedService getDeployableService(SpinnakerService.Type type) {
-    return getDeployableService(type, Object.class);
+  public DistributedService getDeployableService(String serviceName) {
+    return getDeployableService(serviceName, Object.class);
   }
 
-  public <S> DistributedService<S, T> getDeployableService(SpinnakerService.Type type, Class<S> clazz) {
-    Field serviceField = getField(type.getCanonicalName() + "service");
+  public <S> DistributedService<S, T> getDeployableService(String serviceName, Class<S> clazz) {
+    Field serviceField = getField(serviceName + "service");
     if (serviceField == null) {
       return null;
     }
@@ -43,7 +43,7 @@ abstract public class DistributedServiceProvider<T extends Account> extends Spin
     try {
       return (DistributedService<S, T>) serviceField.get(this);
     } catch (IllegalAccessException e) {
-      throw new HalException(Problem.Severity.FATAL, "Can't access service field for " + type + ": " + e.getMessage());
+      throw new HalException(Problem.Severity.FATAL, "Can't access service field for " + serviceName + ": " + e.getMessage());
     } finally {
       serviceField.setAccessible(false);
     }
@@ -52,9 +52,9 @@ abstract public class DistributedServiceProvider<T extends Account> extends Spin
   /**
    * @return the highest priority services first.
    */
-  public List<DistributedService> getPrioritizedDistributedServices(List<SpinnakerService.Type> serviceTypes) {
+  public List<DistributedService> getPrioritizedDistributedServices(List<String> serviceNames) {
     List<DistributedService> result = getFieldsOfType(DistributedService.class).stream()
-        .filter(d -> serviceTypes.contains(d.getService().getType()))
+        .filter(d -> serviceNames.contains(d.getService().getCanonicalName()))
         .collect(Collectors.toList());
 
     result.sort((d1, d2) -> d2.getDeployPriority().compareTo(d1.getDeployPriority()));

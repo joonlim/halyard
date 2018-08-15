@@ -19,12 +19,18 @@
 package com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2;
 
 import com.netflix.spinnaker.halyard.config.model.v1.node.DeploymentConfiguration;
+import com.netflix.spinnaker.halyard.core.error.v1.HalException;
+import com.netflix.spinnaker.halyard.core.problem.v1.Problem;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.ClouddriverProfileFactory;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.KubernetesV2ClouddriverProfileFactory;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ClouddriverService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ServiceSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.DeployPriority;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +41,8 @@ import java.util.List;
 @Component
 @Slf4j
 public class KubernetesV2ClouddriverService extends ClouddriverService implements KubernetesV2Service<ClouddriverService.Clouddriver> {
+  final DeployPriority deployPriority = new DeployPriority(4);
+
   @Delegate
   @Autowired
   KubernetesV2ServiceDelegate serviceDelegate;
@@ -58,4 +66,7 @@ public class KubernetesV2ClouddriverService extends ClouddriverService implement
   public ServiceSettings defaultServiceSettings() {
     return new Settings();
   }
+
+  @Override
+  public DeployPriority getDeployPriority() { return this.deployPriority; }
 }

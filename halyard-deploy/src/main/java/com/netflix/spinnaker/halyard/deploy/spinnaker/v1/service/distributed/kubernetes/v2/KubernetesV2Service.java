@@ -39,6 +39,7 @@ import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ConfigSource;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.HasServiceSettings;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ServiceSettings;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerMonitoringDaemonService;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.DeployPriority;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.SidecarService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.KubernetesSharedServiceSettings;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2.KubernetesV2Utils.SecretMountPair;
@@ -59,6 +60,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public interface KubernetesV2Service<T> extends HasServiceSettings<T> {
+  String getCanonicalName();
   String getServiceName();
   String getDockerRegistry(String deploymentName, SpinnakerArtifact artifact);
   String getSpinnakerStagingPath(String deploymentName);
@@ -66,6 +68,8 @@ public interface KubernetesV2Service<T> extends HasServiceSettings<T> {
   ServiceSettings defaultServiceSettings();
   ObjectMapper getObjectMapper();
   SpinnakerMonitoringDaemonService getMonitoringDaemonService();
+
+  default DeployPriority getDeployPriority() { return DeployPriority.ZERO_DEPLOY_PRIORITY; }
 
   default boolean isEnabled(DeploymentConfiguration deploymentConfiguration) {
     return true;
@@ -206,7 +210,7 @@ public interface KubernetesV2Service<T> extends HasServiceSettings<T> {
 
   default List<ConfigSource> stageConfig(AccountDeploymentDetails<KubernetesAccount> details,
       GenerateService.ResolvedConfiguration resolvedConfiguration) {
-    Map<String, Profile> profiles = resolvedConfiguration.getProfilesForService(getService().getType());
+    Map<String, Profile> profiles = resolvedConfiguration.getProfilesForService(getService());
     String stagingPath = getSpinnakerStagingPath(details.getDeploymentName());
     SpinnakerRuntimeSettings runtimeSettings = resolvedConfiguration.getRuntimeSettings();
 
@@ -314,7 +318,7 @@ public interface KubernetesV2Service<T> extends HasServiceSettings<T> {
   default ServiceSettings buildServiceSettings(DeploymentConfiguration deploymentConfiguration) {
     KubernetesSharedServiceSettings kubernetesSharedServiceSettings = new KubernetesSharedServiceSettings(deploymentConfiguration);
     ServiceSettings settings = defaultServiceSettings();
-    String location = kubernetesSharedServiceSettings.getDeployLocation();
+    String location = kubernetesSharedServiceSettings.getDeployLocation(); // TODO(joonlim) HERE
     settings.setAddress(buildAddress(location))
         .setArtifactId(getArtifactId(deploymentConfiguration.getName()))
         .setLocation(location)
