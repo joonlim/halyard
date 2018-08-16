@@ -21,7 +21,6 @@ package com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service;
 import com.netflix.spinnaker.halyard.config.model.v1.node.DeploymentConfiguration;
 import com.netflix.spinnaker.halyard.config.model.v1.security.ApiSecurity;
 import com.netflix.spinnaker.halyard.core.registry.v1.Versions;
-import com.netflix.spinnaker.halyard.deploy.services.v1.ArtifactService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerArtifact;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.GateBoot128ProfileFactory;
@@ -53,9 +52,6 @@ abstract public class GateService extends SpringService<GateService.Gate> {
   @Autowired
   private GateBoot128ProfileFactory boot128ProfileFactory;
 
-  @Autowired
-  private ArtifactService artifactService;
-
   @Override
   public SpinnakerArtifact getArtifact() {
     return SpinnakerArtifact.GATE;
@@ -85,7 +81,7 @@ abstract public class GateService extends SpringService<GateService.Gate> {
   }
 
   private GateProfileFactory getGateProfileFactory(String deploymentName) {
-    String version = artifactService.getArtifactVersion(deploymentName, SpinnakerArtifact.GATE);
+    String version = getArtifactService().getArtifactVersion(deploymentName, SpinnakerArtifact.GATE);
     try {
       if (Versions.lessThan(version, BOOT_UPGRADED_VERSION)) {
         return boot128ProfileFactory;

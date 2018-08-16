@@ -16,18 +16,19 @@
  *
  */
 
-package com.netflix.spinnaker.halyard.config.model.v1.artifacts.gitlab;
+package com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed;
 
-import com.netflix.spinnaker.halyard.config.model.v1.node.ArtifactAccount;
-import com.netflix.spinnaker.halyard.config.model.v1.node.LocalFile;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+// Used to ensure dependencies are deployed first. The higher the priority, the sooner the service is deployed.
+public class DeployPriority {
+  public static final DeployPriority ZERO_DEPLOY_PRIORITY = new DeployPriority(0);
 
-@Data
-@EqualsAndHashCode(callSuper = false)
-public class GitlabArtifactAccount extends ArtifactAccount {
-  String name;
-  String token;
-  @LocalFile
-  String tokenFile;
+  final Integer priority;
+
+  public DeployPriority(Integer priority) {
+    this.priority = priority;
+  }
+
+  public int compareTo(DeployPriority other) {
+    return this.priority.compareTo(other.priority);
+  }
 }

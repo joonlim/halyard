@@ -18,20 +18,68 @@
 
 package com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2;
 
+import com.netflix.spinnaker.halyard.config.model.v1.node.DeploymentConfiguration;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.OrcaService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ServiceSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpringService;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.DeployPriority;
+import java.util.List;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Delegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Data
 @Component
+@EqualsAndHashCode(callSuper = true)
 public class KubernetesV2OrcaService extends OrcaService implements KubernetesV2Service<OrcaService.Orca> {
+  final DeployPriority deployPriority = new DeployPriority(1);
+
   @Delegate
   @Autowired
   KubernetesV2ServiceDelegate serviceDelegate;
 
   @Override
-  public ServiceSettings defaultServiceSettings() {
-    return new Settings();
+  public ServiceSettings defaultServiceSettings() { return new Settings(); }
+
+  public static class OrcaServiceBuilder extends SpringService.Builder<KubernetesV2OrcaService,OrcaServiceBuilder> {
+    KubernetesV2OrcaService source;
+
+    public OrcaServiceBuilder(KubernetesV2OrcaService source) {
+      super(source.getArtifact(), source.getArtifactService());
+      this.source = source;
+    }
+
+    @Override
+    public KubernetesV2OrcaService build() {
+      Type type = Type.ORCA.withNameSuffix(typeNameSuffix);
+      KubernetesV2OrcaService service = new KubernetesV2OrcaService() {
+        @Override
+        public Type getType() {
+          return type;
+        }
+
+        @Override
+        public List<Profile> getProfiles(DeploymentConfiguration deploymentConfiguration,
+            SpinnakerRuntimeSettings endpoints) {
+          List<Profile> profiles = super.getProfiles(deploymentConfiguration, endpoints);
+          profiles.addAll(generateExtraProfiles(deploymentConfiguration, endpoints));
+          return profiles;
+        }
+
+        @Override
+        public ServiceSettings defaultServiceSettings() {
+          Settings settings = new Settings();
+          activateExtraProfiles(settings);
+          return settings;
+        }
+      };
+
+      service.copyProperties(source);
+      return service;
+    }
   }
 }
