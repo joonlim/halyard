@@ -54,6 +54,11 @@ public class HaServices extends Node implements Cloneable {
   }
 
   @JsonIgnore
+  public boolean hasEnabledHaServiceTypes() {
+    return getEnabledHaServiceTypes().size() > 0;
+  }
+
+  @JsonIgnore
   public List<HaServiceType> getEnabledHaServiceTypes() {
     return getFieldsOfType(HaService.class).stream()
         .filter(HaService::isEnabled)

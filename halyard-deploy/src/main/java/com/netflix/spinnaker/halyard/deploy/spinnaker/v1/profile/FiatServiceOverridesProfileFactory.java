@@ -16,21 +16,26 @@
  *
  */
 
-package com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2;
+package com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile;
 
 import com.netflix.spinnaker.halyard.config.model.v1.node.DeploymentConfiguration;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.extern.slf4j.Slf4j;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerArtifact;
 import org.springframework.stereotype.Component;
 
-@Data
 @Component
-@EqualsAndHashCode(callSuper = true)
-@Slf4j
-public class KubernetesV2ClouddriverService extends AbstractKubernetesV2ClouddriverService {
+public class FiatServiceOverridesProfileFactory extends ServiceOverridesProfileFactory {
   @Override
-  public boolean isEnabled(DeploymentConfiguration deploymentConfiguration) {
-    return !deploymentConfiguration.getDeploymentEnvironment().getHaServices().getClouddriver().isEnabled();
+  protected ServiceOverridesConfig generateServiceOverrides(DeploymentConfiguration deploymentConfiguration) {
+    ServiceOverridesConfig config = new ServiceOverridesConfig();
+
+    ClouddriverConfig clouddriverConfig = new ClouddriverConfig();
+    clouddriverConfig.setBaseUrl("${services.clouddriver-ro.baseUrl:http://localhost:7002}");
+    config.getServices().setClouddriver(clouddriverConfig);
+    return config;
+  }
+
+  @Override
+  public SpinnakerArtifact getArtifact() {
+    return SpinnakerArtifact.FIAT;
   }
 }

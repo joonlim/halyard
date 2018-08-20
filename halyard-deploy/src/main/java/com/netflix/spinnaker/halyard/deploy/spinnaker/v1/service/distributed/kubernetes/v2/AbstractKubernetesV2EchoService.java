@@ -35,9 +35,15 @@ import org.springframework.stereotype.Component;
 @Data
 @Component
 @EqualsAndHashCode(callSuper = true)
-public class KubernetesV2EchoService extends AbstractKubernetesV2EchoService {
+public class AbstractKubernetesV2EchoService extends EchoService implements KubernetesV2Service<EchoService.Echo> {
+  final DeployPriority deployPriority = new DeployPriority(0);
+
+  @Delegate
+  @Autowired
+  KubernetesV2ServiceDelegate serviceDelegate;
+
   @Override
-  public boolean isEnabled(DeploymentConfiguration deploymentConfiguration) {
-    return !deploymentConfiguration.getDeploymentEnvironment().getHaServices().getEcho().isEnabled();
+  public ServiceSettings defaultServiceSettings(DeploymentConfiguration deploymentConfiguration) {
+    return new Settings();
   }
 }

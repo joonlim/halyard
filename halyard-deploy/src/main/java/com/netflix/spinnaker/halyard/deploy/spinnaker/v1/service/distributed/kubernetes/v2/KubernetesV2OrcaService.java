@@ -18,13 +18,16 @@
 
 package com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2;
 
+import com.netflix.spinnaker.halyard.config.model.v1.ha.HaServices;
 import com.netflix.spinnaker.halyard.config.model.v1.node.DeploymentConfiguration;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.OrcaServiceOverridesProfileFactory;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.OrcaService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ServiceSettings;
-import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpringService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.DeployPriority;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -42,44 +45,34 @@ public class KubernetesV2OrcaService extends OrcaService implements KubernetesV2
   @Autowired
   KubernetesV2ServiceDelegate serviceDelegate;
 
+  @Autowired
+  OrcaServiceOverridesProfileFactory orcaServiceOverridesProfileFactory;
+
   @Override
-  public ServiceSettings defaultServiceSettings() {
+  public List<Profile> getProfiles(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+    List<Profile> profiles = super.getProfiles(deploymentConfiguration, endpoints);
+    if (hasServiceOverrides(deploymentConfiguration)) {
+      String filename = "orca-service-overrides.yml";
+      String path = Paths.get(getConfigOutputPath(), filename).toString();
+      profiles.add(orcaServiceOverridesProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints));
+    }
+    return profiles;
+  }
+
+  @Override
+  public ServiceSettings defaultServiceSettings(DeploymentConfiguration deploymentConfiguration) {
+    if (hasServiceOverrides(deploymentConfiguration)) {
+      List<String> profiles = new ArrayList<>();
+      profiles.add("service-overrides");
+      profiles.add("test");
+      profiles.add("local");
+      return new Settings(profiles);
+    }
     return new Settings();
   }
 
-  public static class Builder extends SpringService.Builder<KubernetesV2OrcaService,Builder> {
-    KubernetesV2OrcaService source;
-
-    public Builder(KubernetesV2OrcaService source) {
-      super(source.getArtifact(), source.getArtifactService());
-      this.source = source;
-    }
-
-    @Override
-    public KubernetesV2OrcaService build() {
-      Type type = Type.ORCA.withTypeNameSuffix(typeNameSuffix);
-      KubernetesV2OrcaService service = new KubernetesV2OrcaService() {
-        @Override
-        public Type getType() { return type; }
-
-        @Override
-        public List<Profile> getProfiles(DeploymentConfiguration deploymentConfiguration,
-            SpinnakerRuntimeSettings endpoints) {
-          List<Profile> profiles = super.getProfiles(deploymentConfiguration, endpoints);
-          profiles.addAll(generateExtraProfiles(deploymentConfiguration, endpoints));
-          return profiles;
-        }
-
-        @Override
-        public ServiceSettings defaultServiceSettings() {
-          Settings settings = new Settings();
-          activateExtraProfiles(settings);
-          return settings;
-        }
-      };
-
-      service.copyProperties(source);
-      return service;
-    }
+  private boolean hasServiceOverrides(DeploymentConfiguration deploymentConfiguration) {
+    HaServices haServices = deploymentConfiguration.getDeploymentEnvironment().getHaServices();
+    return haServices.getClouddriver().isEnabled() || haServices.getEcho().isEnabled();
   }
 }

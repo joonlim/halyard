@@ -18,13 +18,16 @@
 
 package com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2;
 
+import com.netflix.spinnaker.halyard.config.model.v1.ha.HaServices;
 import com.netflix.spinnaker.halyard.config.model.v1.node.DeploymentConfiguration;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.IgorServiceOverridesProfileFactory;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.IgorService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ServiceSettings;
-import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpringService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.DeployPriority;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -42,6 +45,9 @@ public class KubernetesV2IgorService extends IgorService implements KubernetesV2
   @Autowired
   KubernetesV2ServiceDelegate serviceDelegate;
 
+  @Autowired
+  IgorServiceOverridesProfileFactory igorServiceOverridesProfileFactory;
+
   @Override
   public boolean isEnabled(DeploymentConfiguration deploymentConfiguration) {
     return deploymentConfiguration.getProviders().getDockerRegistry().isEnabled() ||
@@ -49,43 +55,30 @@ public class KubernetesV2IgorService extends IgorService implements KubernetesV2
   }
 
   @Override
-  public ServiceSettings defaultServiceSettings() {
+  public List<Profile> getProfiles(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+    List<Profile> profiles = super.getProfiles(deploymentConfiguration, endpoints);
+    if (hasServiceOverrides(deploymentConfiguration)) {
+      String filename = "igor-service-overrides.yml";
+      String path = Paths.get(getConfigOutputPath(), filename).toString();
+      profiles.add(igorServiceOverridesProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints));
+    }
+    return profiles;
+  }
+
+  @Override
+  public ServiceSettings defaultServiceSettings(DeploymentConfiguration deploymentConfiguration) {
+    if (hasServiceOverrides(deploymentConfiguration)) {
+      List<String> profiles = new ArrayList<>();
+      profiles.add("service-overrides");
+      profiles.add("test");
+      profiles.add("local");
+      return new Settings(profiles);
+    }
     return new Settings();
   }
 
-  public static class Builder extends SpringService.Builder<KubernetesV2IgorService,Builder> {
-    KubernetesV2IgorService source;
-
-    public Builder(KubernetesV2IgorService source) {
-      super(source.getArtifact(), source.getArtifactService());
-      this.source = source;
-    }
-
-    @Override
-    public KubernetesV2IgorService build() {
-      Type type = Type.IGOR.withTypeNameSuffix(typeNameSuffix);
-      KubernetesV2IgorService service = new KubernetesV2IgorService() {
-        @Override
-        public Type getType() { return type; }
-
-        @Override
-        public List<Profile> getProfiles(DeploymentConfiguration deploymentConfiguration,
-            SpinnakerRuntimeSettings endpoints) {
-          List<Profile> profiles = super.getProfiles(deploymentConfiguration, endpoints);
-          profiles.addAll(generateExtraProfiles(deploymentConfiguration, endpoints));
-          return profiles;
-        }
-
-        @Override
-        public ServiceSettings defaultServiceSettings() {
-          Settings settings = new Settings();
-          activateExtraProfiles(settings);
-          return settings;
-        }
-      };
-
-      service.copyProperties(source);
-      return service;
-    }
+  private boolean hasServiceOverrides(DeploymentConfiguration deploymentConfiguration) {
+    HaServices haServices = deploymentConfiguration.getDeploymentEnvironment().getHaServices();
+    return haServices.getClouddriver().isEnabled() || haServices.getEcho().isEnabled();
   }
 }

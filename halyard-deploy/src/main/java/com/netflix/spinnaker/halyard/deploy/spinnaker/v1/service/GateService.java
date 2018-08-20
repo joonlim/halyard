@@ -122,5 +122,10 @@ abstract public class GateService extends SpringService<GateService.Gate> {
         scheme = "https";
       }
     }
+
+    public Settings(ApiSecurity apiSecurity, List<String> profiles) {
+      this(apiSecurity);
+      setProfiles(profiles);
+    }
   }
 }

@@ -46,46 +46,6 @@ public class SpinnakerRuntimeSettings {
       }
       return super.get(key);
     }
-
-    // Getters for backwards compatibility
-    @JsonIgnore
-    public ServiceSettings getClouddriver() { return this.get(Type.CLOUDDRIVER); }
-    @JsonIgnore
-    public ServiceSettings getClouddriverBootstrap() { return this.get(Type.CLOUDDRIVER_BOOTSTRAP); }
-    @JsonIgnore
-    public ServiceSettings getConsulClient() { return this.get(Type.CONSUL_CLIENT); }
-    @JsonIgnore
-    public ServiceSettings getConsulServer() { return this.get(Type.CONSUL_SERVER); }
-    @JsonIgnore
-    public ServiceSettings getDeck() { return this.get(Type.DECK); }
-    @JsonIgnore
-    public ServiceSettings getEcho() { return this.get(Type.ECHO); }
-    @JsonIgnore
-    public ServiceSettings getFiat() { return this.get(Type.FIAT); }
-    @JsonIgnore
-    public ServiceSettings getFront50() { return this.get(Type.FRONT50); }
-    @JsonIgnore
-    public ServiceSettings getGate() { return this.get(Type.GATE); }
-    @JsonIgnore
-    public ServiceSettings getIgor() { return this.get(Type.IGOR); }
-    @JsonIgnore
-    public ServiceSettings getKayenta() { return this.get(Type.KAYENTA); }
-    @JsonIgnore
-    public ServiceSettings getOrca() { return this.get(Type.ORCA); }
-    @JsonIgnore
-    public ServiceSettings getOrcaBootstrap() { return this.get(Type.ORCA_BOOTSTRAP); }
-    @JsonIgnore
-    public ServiceSettings getRosco() { return this.get(Type.ROSCO); }
-    @JsonIgnore
-    public ServiceSettings getRedis() { return this.get(Type.REDIS); }
-    @JsonIgnore
-    public ServiceSettings getRedisBootstrap() { return this.get(Type.REDIS_BOOTSTRAP); }
-    @JsonIgnore
-    public ServiceSettings getMonitoringDaemon() { return this.get(Type.MONITORING_DAEMON); }
-    @JsonIgnore
-    public ServiceSettings getVaultClient() { return this.get(Type.VAULT_CLIENT); }
-    @JsonIgnore
-    public ServiceSettings getVaultServer() { return this.get(Type.VAULT_SERVER); }
   }
 
   @JsonIgnore

@@ -17,10 +17,13 @@
 package com.netflix.spinnaker.halyard.deploy.deployment.v1;
 
 import com.netflix.spinnaker.halyard.config.model.v1.ha.HaService.HaServiceType;
+import com.netflix.spinnaker.halyard.config.model.v1.ha.HaServices;
 import com.netflix.spinnaker.halyard.config.model.v1.node.Account;
 import com.netflix.spinnaker.halyard.config.model.v1.node.DeploymentConfiguration;
 import com.netflix.spinnaker.halyard.config.model.v1.node.DeploymentEnvironment;
 import com.netflix.spinnaker.halyard.config.model.v1.node.Provider;
+import com.netflix.spinnaker.halyard.config.model.v1.node.Provider.ProviderType;
+import com.netflix.spinnaker.halyard.config.model.v1.node.Provider.ProviderVersion;
 import com.netflix.spinnaker.halyard.config.problem.v1.ConfigProblemBuilder;
 import com.netflix.spinnaker.halyard.config.services.v1.AccountService;
 import com.netflix.spinnaker.halyard.core.error.v1.HalException;
@@ -29,8 +32,8 @@ import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerServic
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.bake.debian.BakeDebianServiceProvider;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.google.GoogleDistributedServiceProvider;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v1.KubernetesV1DistributedServiceProvider;
-import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2.ha.HaKubectlServiceProviderFactory;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2.KubectlServiceProvider;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2.ha.HaKubectlServiceProviderFactory;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.local.debian.LocalDebianServiceProvider;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.local.git.LocalGitServiceProvider;
 import java.util.List;
@@ -46,7 +49,7 @@ public class ServiceProviderFactory {
   KubernetesV1DistributedServiceProvider kubernetesV1DistributedServiceProvider;
 
   @Autowired
-  KubectlServiceProvider kubectlServiceProvider; // TODO(joonlim): Should we officially depricate this in favor of HaKubectlServiceProviderFactory?
+  HaKubectlServiceProviderFactory haKubectlServiceProviderFactory;
 
   @Autowired
   GoogleDistributedServiceProvider googleDistributedServiceProvider;
@@ -59,9 +62,6 @@ public class ServiceProviderFactory {
 
   @Autowired
   BakeDebianServiceProvider bakeDebianServiceProvider;
-
-  @Autowired
-  HaKubectlServiceProviderFactory haKubectlServiceProviderFactory;
 
   public SpinnakerServiceProvider create(DeploymentConfiguration deploymentConfiguration) {
     DeploymentEnvironment.DeploymentType type = deploymentConfiguration.getDeploymentEnvironment().getType();
@@ -92,13 +92,18 @@ public class ServiceProviderFactory {
     Account account = accountService.getAnyProviderAccount(deploymentConfiguration.getName(), accountName);
     Provider.ProviderType providerType = ((Provider) account.getParent()).providerType();
 
+    HaServices haServices = deploymentEnvironment.getHaServices();
+    if (haServices.hasEnabledHaServiceTypes() &&
+        (providerType != ProviderType.KUBERNETES || account.getProviderVersion() != ProviderVersion.V2)) {
+      throw new IllegalArgumentException("Can only deploy HA services for KubernetesV2 provider.");
+    }
+
     switch (providerType) {
       case KUBERNETES:
         switch (account.getProviderVersion()) {
           case V1:
             return kubernetesV1DistributedServiceProvider;
           case V2:
-            List<HaServiceType> haServices = deploymentEnvironment.getHaServices().getEnabledHaServiceTypes();
             return haKubectlServiceProviderFactory.create(haServices);
           default:
             return kubernetesV1DistributedServiceProvider;

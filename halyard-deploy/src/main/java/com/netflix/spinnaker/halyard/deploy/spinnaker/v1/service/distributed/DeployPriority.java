@@ -20,8 +20,6 @@ package com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed;
 
 // Used to ensure dependencies are deployed first. The higher the priority, the sooner the service is deployed.
 public class DeployPriority {
-  public static final DeployPriority ZERO_DEPLOY_PRIORITY = new DeployPriority(0);
-
   final Integer priority;
 
   public DeployPriority(Integer priority) {

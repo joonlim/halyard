@@ -28,7 +28,6 @@ import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSetting
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpinnakerServiceProvider;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.KubernetesSharedServiceSettings;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +35,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Deprecated
 @Component
 public class KubectlServiceProvider extends SpinnakerServiceProvider<AccountDeploymentDetails<KubernetesAccount>> {
   @Autowired

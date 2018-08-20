@@ -18,26 +18,48 @@
 
 package com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.kubernetes.v2;
 
+
 import com.netflix.spinnaker.halyard.config.model.v1.node.DeploymentConfiguration;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.SpinnakerRuntimeSettings;
+import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.ClouddriverRoProfileFactory;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.profile.Profile;
-import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.EchoService;
 import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.ServiceSettings;
-import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.SpringService;
-import com.netflix.spinnaker.halyard.deploy.spinnaker.v1.service.distributed.DeployPriority;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.Delegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Data
 @Component
-@EqualsAndHashCode(callSuper = true)
-public class KubernetesV2EchoService extends AbstractKubernetesV2EchoService {
+public class KubernetesV2ClouddriverRoService extends AbstractKubernetesV2ClouddriverService{
+  @Autowired
+  ClouddriverRoProfileFactory clouddriverRoProfileFactory;
+
+  @Override
+  public Type getType() {
+    return Type.CLOUDDRIVER_RO;
+  }
+
   @Override
   public boolean isEnabled(DeploymentConfiguration deploymentConfiguration) {
-    return !deploymentConfiguration.getDeploymentEnvironment().getHaServices().getEcho().isEnabled();
+    return deploymentConfiguration.getDeploymentEnvironment().getHaServices().getClouddriver().isEnabled();
+  }
+
+  @Override
+  public List<Profile> getProfiles(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {
+    List<Profile> profiles = super.getProfiles(deploymentConfiguration, endpoints);
+    String filename = "clouddriver-ro.yml";
+    String path = Paths.get(getConfigOutputPath(), filename).toString();
+    profiles.add(clouddriverRoProfileFactory.getProfile(filename, path, deploymentConfiguration, endpoints));
+    return profiles;
+  }
+
+  @Override
+  public ServiceSettings defaultServiceSettings(DeploymentConfiguration deploymentConfiguration) {
+    List<String> profiles = new ArrayList<>();
+    profiles.add("ro");
+    profiles.add("ro-test");
+    profiles.add("ro-local");
+    return new Settings(profiles);
   }
 }

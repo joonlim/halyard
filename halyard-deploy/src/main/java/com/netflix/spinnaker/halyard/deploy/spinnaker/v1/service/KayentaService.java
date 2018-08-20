@@ -62,9 +62,7 @@ abstract public class KayentaService extends SpringService<KayentaService.Kayent
   }
 
   @Override
-  public Class<Kayenta> getEndpointClass() {
-    return Kayenta.class;
-  }
+  public Class<Kayenta> getEndpointClass() { return Kayenta.class; }
 
   @Override
   public List<Profile> getProfiles(DeploymentConfiguration deploymentConfiguration, SpinnakerRuntimeSettings endpoints) {

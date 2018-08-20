@@ -48,27 +48,7 @@ public class KubernetesV2RedisService extends RedisService implements Kubernetes
   }
 
   @Override
-  public ServiceSettings defaultServiceSettings() {
+  public ServiceSettings defaultServiceSettings(DeploymentConfiguration deploymentConfiguration) {
     return new Settings();
-  }
-
-  public static class Builder extends SpinnakerService.Builder<KubernetesV2RedisService,Builder> {
-    KubernetesV2RedisService source;
-
-    public Builder(KubernetesV2RedisService source) {
-      this.source = source;
-    }
-
-    @Override
-    public KubernetesV2RedisService build() {
-      Type type = Type.REDIS.withTypeNameSuffix(typeNameSuffix);
-      KubernetesV2RedisService service = new KubernetesV2RedisService() {
-        @Override
-        public Type getType() { return type; }
-      };
-
-      service.copyProperties(source);
-      return service;
-    }
   }
 }
